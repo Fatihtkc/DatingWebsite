@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+/* Genel Ayarlar */
+.manager-page-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.manager-page-title {
+  text-align: center;
+  font-size: 32px;
+  color: #a31d1d;
+  margin-bottom: 20px;
+}
+
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.delete-button2 {
+  padding: 8px 12px;
+  margin-left: 10px;
+  max-width: 100px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-button2:hover {
+  background-color: #c0392b;
+}
+
+.hire-button {
+  background-color: #4CAF50; /* Yeşil */
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 20px 0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.hire-button:hover {
+  background-color: #45a049;
+}
+
+
+/* Arama Kutusu */
+.search-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 10px;
+  font-size: 16px;
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Header Satırı */
+.employee-header {
+  background-color: #d84040;
+  color: white;
+  font-weight: bold;
+  display: grid;
+  grid-template-columns: 2.5fr 2fr 1.2fr 1.2fr 1.2fr 1.2fr;
+  gap: 10px;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.employee-header span {
+  padding: 0 5px;
+  border-right: 1px solid white;
+}
+
+.employee-header span:last-child {
+  border-right: none;
+}
+
+/* Çalışan Listesi */
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Çalışan Kartı */
+.employee-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.employee-summary {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.employee-summary:hover {
+  background-color: #f5f5f5;
+}
+
+.employee-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+/* Çalışan Bilgileri Grid */
+.employee-info {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1.2fr 1.2fr 1.2fr 1.2fr;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  width: 100%;
+  padding: 10px 0;
+}
+
+.employee-info span {
+  text-align: center;
+  padding: 0 5px;
+  border-right: 1px solid #ddd;
+}
+
+.employee-info span:last-child {
+  border-right: none;
+}
+
+/* Genişleyen Düzenleme Bölümü */
+.employee-edit {
+  padding: 15px;
+  background-color: #fafafa;
+  border-top: 1px solid #ddd;
+  display: grid;
+  gap: 10px;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-row label {
+  min-width: 120px;
+  font-weight: bold;
+  color: #d84040;
+  text-align: right;
+}
+
+.edit-row input,
+.edit-row select {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Düzenleme Butonları */
+.edit-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.save-button {
+  padding: 10px 20px;
+  background-color: #d84040;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.save-button:hover {
+  background-color: #a31d1d;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  background-color: #ccc;
+  color: black;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancel-button:hover {
+  background-color: #bbb;
+}
+
+.stats-container {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 24px;
+  background-color: #fdfdfd;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.stats-container h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 28px;
+  color: #333;
+}
+
+.stats-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0 70px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background-color: #D84040;
+  border-radius: 10px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  min-width: 180px;
+  flex: 1 0 200px;
+}
+
+.stat-card h4 {
+  margin-bottom: 8px;
+  color: #F8F2DE;
+}
+
+.h5 {
+  font-size: 1.3rem;
+  color: #690f0f;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 30px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.stat-card p {
+  font-size: 24px;
+  color: #fdfdfd;
+  font-weight: bold;
+}
+
+
+
+.distribution-section {
+  margin-top: 24px;
+}
+
+.distribution-section h3 {
+  color: #111;
+  margin-bottom: 12px;
+}
+
+.distribution-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.distribution-section li {
+  background-color: #D84040;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+
+/* Responsive Ayarlar */
+@media screen and (max-width: 1024px) {
+  .employee-header {
+    grid-template-columns: repeat(6, 1fr);
+    font-size: 14px;
+  }
+  .employee-info {
+    grid-template-columns: repeat(6, 1fr);
+    font-size: 13px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .employee-info {
+    grid-template-columns: repeat(4, auto);
+  }
+  .employee-header {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  /* Header satırında yalnızca "Full Name" sütunu görünsün */
+  .employee-header {
+    grid-template-columns: 2fr; /* Sadece ilk sütun */
+  }
+  .employee-header span:nth-child(n+2) {
+    display: none;
+  }
+  
+  /* Çalışan kartındaki bilgi kısmında yalnızca "Full Name" sütunu görünsün */
+  .employee-info {
+    grid-template-columns: 2fr; /* Sadece ilk sütun */
+  }
+  .employee-info span:nth-child(n+2) {
+    display: none;
+  }
+}
+
+

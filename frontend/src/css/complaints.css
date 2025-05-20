@@ -1,0 +1,146 @@
+.complaints-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    align-items: center;
+    width: 100%;
+    background: #ecdcbf;
+}
+
+/* Şikayet kutusu */
+.complaint-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #F8F2DE;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 90%; /* Mobilde tam genişlik */
+    max-width: 1000px; /* Büyük ekranda maksimum genişlik */
+    border: 1px solid #ddd;
+}
+
+.complaint-box:hover {
+    background: #D84040;
+}
+
+/* Şikayet eden ve edilen kişi bilgisi */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 15px;
+    background: #A31D1D; /* Mor arka plan */
+    border-radius: 20px; /* Elips şekli */
+    color: white;
+    font-weight: bold;
+    transition: 0.3s;
+    max-width: 250px; /* Uzun isimler taşmasın */
+    width: 250px; /* Sabit genişlik */
+    height: 45px; /* Sabit yükseklik */
+    overflow: hidden; /* İçerik taşmasını engelle */
+    white-space: nowrap;
+}
+
+/* Profil resmi (tam yuvarlak ve her zaman görünür) */
+.profile3-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Tam yuvarlak */
+    cursor: pointer;
+    border: 2px solid white;
+    object-fit: cover;
+    flex-shrink: 0; /* Küçülmesini önle */
+}
+
+/* Kullanıcı adı (uzun olursa ... ile kısalt) */
+.user-info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 18px;
+    white-space: nowrap;
+    display: block;
+    flex: 1; /* Metin alanı esnek olacak */
+}
+
+/* Şikayet metni */
+.complaint-reason {
+    flex: 1;
+    text-align: center; /* ORTALI */
+    font-size: 17px !important;
+    font-weight: bold;
+    color: #000000;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Maksimum 2 satır */
+    -webkit-box-orient: vertical;
+    max-width: 300px; /* Metni sınırlı tut */
+    white-space: normal; /* Satır içine sığmayanlar taşmasın */
+}
+
+.complaint-reason::before {
+    content: "Complaint Reason: ";
+    color: #570f0f;
+    font-weight: bold;
+}
+
+/* RESPONSIVE TASARIM */
+@media screen and (max-width: 768px) {
+    .complaint-box {
+        flex-direction: column; /* Mobilde dikey hizalama */
+        align-items: center;
+        padding: 15px;
+        width: 95%; /* Tam genişlik */
+    }
+
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+        padding: 8px;
+        border-radius: 15px; /* Küçük ekran için daha dar elips */
+        font-size: 14px;
+        max-width: 120px;
+        width: 120px; /* Mobilde sabit genişlik */
+        height: 45px;
+    }
+
+    .profile-pic {
+        width: 35px;
+        height: 35px;
+    }
+
+    .complaint-reason {
+        font-size: 12px;
+        text-align: center;
+        max-width: 250px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .complaint-box {
+        padding: 10px;
+        width: 100%;
+    }
+
+    .user-info {
+        font-size: 12px;
+        padding: 6px;
+        max-width: 100px;
+        width: 100px; /* Küçük ekran için sabit */
+        height: 40px;
+    }
+
+    .profile-pic {
+        width: 30px;
+        height: 30px;
+    }
+
+    .complaint-reason {
+        font-size: 11px;
+        max-width: 200px;
+    }
+}

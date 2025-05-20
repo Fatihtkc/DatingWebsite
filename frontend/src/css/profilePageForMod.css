@@ -1,0 +1,344 @@
+/* Genel Profil Sayfası Stilleri */
+.profile4-container {
+    background-color: #F8F2DE;
+    padding: 50px; /* Daha kompakt hale getirildi */
+    border-radius: 16px;
+    margin-top: 200px !important;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+    max-width: 750px;
+    width: 90%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+header {
+    background: #ECDCBF;
+    height: 70px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content:center;
+    position: relative;
+}
+
+/* Logo ve başlık */
+header .logo {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+header .logo-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 40px;
+    background: linear-gradient(to right, #fca503 , #7A52A1);
+    -webkit-background-clip: text; 
+    color: transparent;
+    margin: 0;
+}
+
+/* Profil Başlığı */
+.profile2-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #A31D1D;
+    margin-bottom: 20px;
+}
+
+/* Profil İçeriği: Sol - Profil Resmi, Sağ - Bilgiler */
+.profile2-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* Profil Resmi */
+.profile2-picture {
+    flex: 0 0 180px;  /* Resim boyutu büyütüldü */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -20px; /* Biraz yukarı taşındı */
+}
+
+.profile2-picture img {
+    width: 180px; /* Artırıldı */
+    height: 180px; /* Artırıldı */
+    border-radius: 50%; /* Tam yuvarlak */
+    object-fit: cover;
+    border: 3px solid #A31D1D;
+}
+
+/* Profil Bilgileri */
+.profile2-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center; /* Ortalanmış */
+}
+
+/* Her Bilgi Grubu: LABEL ve VALUE aynı satırda */
+.info-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+}
+
+.info-group label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #A31D1D;
+    min-width: 120px; /* Sabit alan */
+    text-align: right;
+}
+
+.info-group .info-value {
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+}
+
+/* Okunur Input Alanı (kullanılmasa da örnek olarak) */
+.profile2-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Şifre Alanı ve Toggle Butonu Aynı Satırda */
+.password2-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+}
+
+.password2-toggle-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #D84040;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.password2-toggle-button:hover {
+    background-color: #A31D1D;
+}
+
+/* Profil Sayfası Butonları */
+.profile2-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.profile2-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #D84040;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s;
+    width: 160px;
+    text-align: center;
+}
+
+.profile2-button:hover {
+    background-color: #A31D1D;
+    transform: scale(1.05);
+}
+
+/* Şifre Alanı ve Change Password Butonu */
+.password2-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.change-password2-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    width: 100%;
+    font-weight: bold;
+    background-color: #D84040;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.change-password2-button:hover {
+    background-color: #A31D1D;
+}
+
+/* Şifre Değiştirme Popup Stilleri */
+.password2-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.password2-popup {
+    background-color: #F8F2DE;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+}
+
+.password2-popup h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #A31D1D;
+}
+
+.popup-form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.popup-form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #A31D1D;
+    margin-bottom: 5px;
+}
+
+.popup-form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.valid-indicator {
+    color: green;
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+/* Şifre Gereksinimleri Notu */
+.password2-requirements {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Save Password Butonu */
+.save-password2-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #D84040;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s;
+    width: 100%;
+}
+
+.save-password2-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.save-password2-button:hover:not(:disabled) {
+    background-color: #A31D1D;
+    transform: scale(1.05);
+}
+
+.notification { /* Profile Page için*/
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: fadeOut 3s ease-in-out forwards;
+}
+
+.notification2 { /* Profile Page için*/
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(60, 219, 28, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: fadeOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Responsive Ayarlar */
+@media screen and (max-width: 768px) {
+    .profile2-content {
+        flex-direction: column;
+        align-items: center;
+    }
+    .profile2-picture {
+        margin-bottom: 20px;
+    }
+    .profile2-info {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .profile2-container {
+        padding: 30px;
+    }
+    .profile2-title {
+        font-size: 24px;
+    }
+    .profile2-button, .password-toggle-button, .save-password-button {
+        width: 100%;
+    }
+}

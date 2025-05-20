@@ -1,0 +1,235 @@
+/* Genel düzen */
+.complaint-detail-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  height: 1000px;
+  flex-wrap: wrap;
+  background: #ecdcbf;
+}
+
+/* Sol Bölüm: Sidebar */
+.complaint-detail-sidebar {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.complaint-owner-box,
+.complaint-target-box {
+  background: #F8F2DE;
+  border: 1px solid #F8F2DE;
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.complaint-owner-box:hover,
+.complaint-target-box:hover {
+  background: #f1e0a6;
+}
+
+.owner-info,
+.target-info {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.owner-info img,
+.target-info img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+/* Kullanıcıyı Banla Butonu */
+  .ban-user-button {
+      background: #D84040; /* Mor arka plan */
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      text-align: center;
+      margin-top: 10px;
+      transition: background 0.3s;
+  }
+
+  .ban-user-button:hover {
+      background: #A31D1D;
+  }
+
+  /* Kullanıcı bilgileri */
+  .user-info-label {
+      color: #A31D1D;
+      font-weight: bold;
+      display: block;
+      margin-top: 5px;
+  }
+
+  .user-info-value {
+      color: black;
+      font-weight: normal;
+  }
+
+
+/* Sağ Bölüm: Şikayet Detayları */
+.complaint-detail-main {
+  flex: 1;
+  min-width: 300px;
+}
+
+.complaint-content-box {
+  background: #F8F2DE;
+  border: 1px solid #F8F2DE;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.complaint-reason-text {
+  font-size: 19px;
+  font-weight: bold;
+  color: #A31D1D;
+  margin-bottom: 15px;
+}
+
+.complaint-images {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.complaint-image {
+  max-width: 200px;
+  width: 100%;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.complaint-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.delete-complaint-button {
+  background: #D84040;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.delete-complaint-button:hover {
+  background: #A31D1D;
+}
+
+/* Lightbox Overlay */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.lightbox-image {
+  width: 100%;
+  height: auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 30px;
+  color: white;
+  cursor: pointer;
+}
+
+.lightbox-prev,
+.lightbox-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 40px;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lightbox-prev {
+  left: 10px;
+}
+
+.lightbox-next {
+  right: 10px;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .complaint-detail-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .complaint-detail-sidebar {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .complaint-content-box {
+    width: 100%;
+  }
+
+  .lightbox-prev,
+  .lightbox-next {
+    font-size: 30px;
+  }
+
+  .lightbox-close {
+    font-size: 25px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .owner-info img,
+  .target-info img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .complaint-image {
+    max-width: 150px;
+  }
+}
