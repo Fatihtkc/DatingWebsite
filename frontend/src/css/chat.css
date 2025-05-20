@@ -1,0 +1,447 @@
+.chat-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar (Chat List) */
+.chat-list {
+  width: 30%;
+  background: #d84040;
+  color: white;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Chat User (Sidebar) */
+.chat-user {
+  display: flex;
+  align-items: center;
+  border-radius: 7px;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ffffff33;
+  position: relative;
+  gap: 10px;
+}
+
+/* Tüm İsimler Aynı Hizada */
+.chat-user div {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10px;
+}
+
+/* Mesaj Üzerine Gelince Koyu Mor */
+.chat-user:hover {
+  background: #a31d1d;
+}
+
+/* Profil Fotoğrafı */
+.profile-pic {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-pic:hover {
+  border: 3px solid #D84040; /* Hover durumunda pembe border */
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.3); /* Hafif gölge efekti */
+  transform: scale(1.05); /* Hafif büyüme efekti */
+}
+
+/* Sidebar'daki üç nokta butonu */
+.menu-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: white;
+  padding: 5px;
+  margin-left: auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Chat Window */
+.chat-window {
+  width: 70%;
+  background: #ecdcbf;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat Header */
+.chat-header {
+  width: 100%;
+  height: 60px;
+  background-color: #ecdcbf;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: #a31d1d;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Chat İçindeki Profil Fotoğrafı */
+.profile-pic-large {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+/* Mesaj satırı – hizalama için dış konteyner */
+.message {
+  display: flex;
+  width: 100%;
+  margin: 5px 0;
+}
+
+/* Gönderenin kim olduğuna göre hizala */
+.message.mine {
+  justify-content: flex-end;
+}
+.message.theirs {
+  justify-content: flex-start;
+}
+
+/* Mesaj balonu */
+.bubble {
+  display: inline-block;
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  position: relative;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap; /* ↔️ Satır sonu ve boşluklar da korunur */
+}
+
+/* Hover ile menü gösterilsin */
+.bubble:hover .menu-container {
+  display: block;
+}
+
+/* Gönderen balonları */
+.bubble.mine {
+  background: #f8f2de;
+  color: white;
+  border-radius: 18px 18px 0 18px;
+}
+
+.bubble.theirs {
+  background: #f8f2de;
+  color: black;
+  border-radius: 18px 18px 18px 0;
+}
+
+/* Mesaj içeriği */
+.bubble p {
+  margin: 0;
+  padding: 0 20px 0 0;
+  display: inline-block;
+}
+
+/* Menü butonunun kapsayıcısı */
+.menu-container {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+/* Menü butonu */
+.menu-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: black;
+}
+
+/* Menü içeriği */
+.message-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #f8f2de;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.message-menu button {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: background 0.2s ease-in-out;
+}
+
+.message-menu button:hover {
+  background: #e7e5e5;
+}
+
+
+/* Sidebar Üç Nokta Menüsü Ortada Açılacak */
+.sidebar-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  text-align: center;
+  z-index: 1000;
+}
+
+/* Sidebar Menü Butonları */
+.sidebar-menu button {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: background 0.2s ease-in-out;
+}
+
+.sidebar-menu button:hover {
+  background: #e7e5e5;
+}
+
+/* Mesaj Menü Butonları */
+.message-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #f8f2de;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.message-menu button {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: background 0.2s ease-in-out;
+}
+
+.message-menu button:hover {
+  background: #e7e5e5;
+}
+
+/* 📌 Mesaj Yazma Kutusu (Büyütüldü) */
+.message-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #f8f2de;
+  border-radius: 6px;
+  color: transparent;
+  background: #f8f2de;
+}
+
+.message-input input {
+  flex-grow: 1;
+  padding: 14px;
+  border: 1px solid #ccc;
+  background-color: #f8f2de !important;
+  border-radius: 6px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.message-input button {
+  padding: 14px 22px;
+  margin-left: 10px;
+  background: #d84040;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.message-input button:hover {
+  background: #a31d1d;
+}
+
+/* Chat Layout */
+.chat-content {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 60px);
+}
+
+.report-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  width: 300px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1000;
+}
+
+.report-modal h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.report-modal p {
+  margin-bottom: 10px;
+  color: #704343 !important;
+}
+
+.report-modal select {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.report-submit-btn {
+  background: #ff4d4d;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.close-modal-btn {
+  background: gray;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.report-submit-btn:hover {
+  background: #cc0000;
+}
+
+.close-modal-btn:hover {
+  background: #666;
+}
+
+.chat-header3 .logo-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 40px;
+  background: linear-gradient(to right, #d84040, #e6ae48);
+  -webkit-background-clip: text; 
+  color: transparent;
+  margin: 0;
+}   
+
+.chat-header2 {
+  width: 100%;
+  height: 60px;
+  background-color: #a31d1d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-radius: 20px;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.chat-header3 {
+  width: 100%;
+  height: 60px;
+  background-color: #f8f2de;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: #534040;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.chat-header3 .back-button3 {
+  align-self: flex-start;
+  margin-top: 18px !important;
+  background: none;
+  border: none;
+  color: #a31d1d;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.message.mine {
+  text-align: right;
+}
+
+.message.theirs {
+  text-align: left;
+}
+
+.bubble.mine {
+  background-color: #daf8cb;
+  display: inline-block;
+  padding: 8px;
+  border-radius: 15px;
+  margin: 5px;
+}
+
+.bubble.theirs {
+  background-color: #f1f0f0;
+  display: inline-block;
+  padding: 8px;
+  border-radius: 15px;
+  margin: 5px;
+}
+
+.message-image {
+  max-width: 200px;
+  border-radius: 10px;
+}
+
+.timestamp {
+  font-size: 0.7em;
+  color: gray;
+  margin-left: 5px;
+}

@@ -1,0 +1,190 @@
+.moderation-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .accounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .account-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .approve {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .reject {
+    background: #F44336;
+    color: white;
+  }
+
+/* Header Section (Navbar) */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  background: #ecdcbf;
+  font-family: 'Lora', serif;
+}
+
+
+header {
+    background: purple;
+    height: 70px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content:center;
+    position: relative;
+}
+
+/* Logo ve başlık */
+header .logo {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+header .logo-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 40px;
+    background: linear-gradient(to right, #fca503 , #7A52A1);
+    -webkit-background-clip: text; 
+    color: transparent;
+    margin: 0;
+}
+
+
+header .header-divider2 {
+  height: 40px; 
+  width: 5px; 
+  background: #ffffff;
+  border-radius: 2px;
+  margin: 0 20px;
+}
+
+/* Admin Wrapper for Layout */
+.admin-wrapper {
+  display: flex;
+  height: calc(100% - 66px);
+}
+
+/* Left Sidebar Styling */
+.admin-wrapper .left-sidebar {
+  flex: 2;
+  height: 100%;
+  background: #6e0683;
+}
+
+.admin-wrapper .left-sidebar ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  color: aliceblue;
+}
+
+.admin-wrapper .left-sidebar ul li a {
+  padding: 18px;
+  display: block;
+  border-bottom: 1px solid #1b0020;
+}
+
+.admin-wrapper .left-sidebar ul li a:hover {
+  background: #1b0020;
+}
+
+/* Admin Content Styling */
+.admin-wrapper .admin-content {
+  flex: 8;
+  height: 100%;
+  padding: 40px 100px 100px;
+  overflow-y: scroll;
+}
+
+/* Page Title */
+.admin-wrapper .page-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 1.1rem;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #1b0020;
+}
+
+/* Action Button Styles */
+.edit {
+  color: #611919;
+}
+
+.publish {
+  color: rgb(29, 95, 32);
+}
+
+.delete {
+  color: rgb(22, 81, 121);
+}
+
+.edit:hover,
+.delete:hover,
+.publish:hover {
+  text-decoration: underline;
+}
+
+/* Form Input Styling */
+form div {
+  margin-bottom: 15px;
+}
+
+/* User Profile Picture and Table Layout */
+table td img {
+  width: 50px; /* Resimlerin genişliği */
+  height: 50px; /* Resimlerin yüksekliği */
+  border-radius: 50%; /* Yuvarlak resimler */
+  margin-right: 10px; /* Resim ile isim arasına boşluk */
+}
+
+table td {
+  display: flex;
+  align-items: center; /* Resim ve metni yatayda ortalar */
+  gap: 20px; /* Resim ile metin arasına boşluk ekler */
+}
+
+/* User Table Styling (Wider Area for Users) */
+table td {
+  padding: 20px; /* Hücrelerin etrafında daha fazla boşluk */
+}
+
+/* Navbar Logo */
+header img {
+  height: 40px;
+  margin-right: 20px;
+}

@@ -1,0 +1,247 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* Genel Stil */
+body, html, .container {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #ecdcbf;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f2de;
+  padding: 10px 20px;
+  color: #f8f2de;
+}
+
+/* Navbar */
+.header-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.header-left, .header-nav, .header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  width: 100px;
+  position: relative;
+  background: #7A52A1;
+  border-radius: 10px;
+}
+
+.logo {
+  height: 50px;
+}
+
+/* Navigation */
+.nav-item {
+  color:  #A31D1D;
+  text-decoration: none;
+  margin: 0 10px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.nav-item:hover {
+  text-decoration: underline;
+  color: #D84040;
+}
+
+.nav-item.active {
+  font-weight: bold;
+}
+
+/* Body - Profil Listesi */
+.profil-listesi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  justify-content: center;
+}
+
+/* Profil Kartı */
+.profil-karti {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 300px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #F8F2DE;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer; /* Kartın tamamı tıklanabilir */
+}
+
+/* Profil Resmi */
+.profil-resim {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Profil Bilgisi */
+.profil-bilgi {
+  width: 100%;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.profil-bilgi h3 {
+  margin: 5px 0;
+}
+
+/* Yeni Butonlar Kutusu */
+.profil-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* Buton Stilleri */
+.approve-button,
+.delete-button {
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 45%;
+  text-align: center;
+  transition: background 0.3s ease;
+}
+
+.approve-button {
+  background-color: #e0f8e0;
+  color: green;
+}
+
+.approve-button:hover {
+  background-color: #c0eac0;
+}
+
+.delete-button {
+  background-color: #f8e0e0;
+  color: red;
+}
+
+.delete-button:hover {
+  background-color: #eac0c0;
+}
+
+/* Profil Butonu (Header) */
+.profile-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px;
+}
+
+/* Dropdown Menü */
+.dropdown-menu {
+  position: absolute;
+  top: 33px;
+  right: 0px;
+  background: #7A52A1;
+  border-radius: 5px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-item {
+  padding: 10px;
+  text-align: left;
+  border: none;
+  background: none;
+  color:#fff;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #451150;
+}
+
+/* Logout Butonu */
+.logout {
+  color: red;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+  .header {
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      text-align: center;
+  }
+
+  .header-nav {
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+  }
+
+  .header-right {
+      margin-top: 10px;
+  }
+
+  /* Dropdown menüyü düzelt */
+  .dropdown-menu {
+      top: 45px;
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+  }
+
+  /* Profil listesi tam genişlik alsın */
+  .profil-listesi {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 10px;
+  }
+
+  /* Profil kartları tam genişlik alsın */
+  .profil-karti {
+      width: 90%;
+      max-width: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+      padding: 10px;
+  }
+
+  .header-nav {
+      gap: 8px;
+  }
+
+  .profil-karti {
+      width: 100%;
+      max-width: 320px;
+      padding: 10px;
+  }
+
+  .profil-resim {
+      width: 100%;
+      border-radius: 5px;
+  }
+}
