@@ -31,14 +31,14 @@ To get the project on your computer, follow these steps:
 **Method 1: Download with Git (Recommended)**  
 Open a terminal, navigate to the folder where you want to download the project, and run:
 
-    git clone https://github.com/Fatihtkc/Dating-Website.git
+    git clone https://github.com/Fatihtkc/DatingWebsite.git
 
 Once the download is complete, navigate into the project folder with:
 
     cd Dating-Website
 
 **Method 2: Download as a ZIP File**  
-1. Go to the GitHub page: [SoulM GitHub](https://github.com/Fatihtkc/Dating-Website)  
+1. Go to the GitHub page: [SoulM GitHub](https://github.com/Fatihtkc/DatingWebsite)  
 2. Click the **Code** button and select **Download ZIP**.  
 3. Extract the downloaded ZIP file to a folder on your computer.  
 4. Open a terminal inside the extracted folder.
