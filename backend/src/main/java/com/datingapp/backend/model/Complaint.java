@@ -17,20 +17,23 @@ public class Complaint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    // Şikayeti yapan kullanıcı
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complainant_id")
     private User complainant;
     
-    // Şikayet konusu: genellikle başka bir kullanıcı
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complained_id")
     private User complained;
     
-    // Şikayet nedeni ve detayları
     private String reason;
+
     private LocalDateTime complaintDate;
 
     @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ComplaintImage> images;
+
+    public void addImage(ComplaintImage image) {
+        images.add(image);
+        image.setComplaint(this);
+    }
 }

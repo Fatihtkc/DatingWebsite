@@ -5,24 +5,23 @@ import java.time.LocalDateTime;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.model.Token;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.TokenRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.TokenService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class TokenServiceImpl implements TokenService {
 
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public TokenServiceImpl(TokenRepository tokenRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.tokenRepository = tokenRepository;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public void createToken(User user, String token, Token.TokenType type, Duration validity) {
@@ -30,7 +29,7 @@ public class TokenServiceImpl implements TokenService {
         t.setToken(token);
         t.setUser(user);
         t.setType(type);
-        t.setExpiryDate(LocalDateTime.now().plusMinutes(30));
+        t.setExpiryDate(LocalDateTime.now().plus(validity));
         tokenRepository.save(t);
     }
 
@@ -58,7 +57,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public void createPasswordResetToken(String email, String token, Duration duration) {
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
         createToken(user, token, Token.TokenType.PASSWORD_RESET, duration);
     }
     

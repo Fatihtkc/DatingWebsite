@@ -8,21 +8,19 @@ import com.datingapp.backend.repository.ModeratorRepository;
 import com.datingapp.backend.repository.ManagerRepository;
 import com.datingapp.backend.security.PasswordUtil;
 import com.datingapp.backend.service.LoginService;
+
+import lombok.RequiredArgsConstructor;
+
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private ModeratorRepository moderatorRepository;
-    
-    @Autowired
-    private ManagerRepository managerRepository;
+    private final UserRepository userRepository;
+    private final ModeratorRepository moderatorRepository;
+    private final ManagerRepository managerRepository;
 
     @Override
     public User registerUser(String email, String rawPassword) {

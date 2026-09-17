@@ -1,7 +1,7 @@
 package com.datingapp.backend.service;
 
-import java.util.Map;
+import com.datingapp.backend.dto.Stats.UserStatsDTO;
 
 public interface UserStatsService {
-    Map<String, Object> getStats();
+    UserStatsDTO getStats();
 }

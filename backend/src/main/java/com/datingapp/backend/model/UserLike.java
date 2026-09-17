@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_likes")
+@Table(name = "user_likes", uniqueConstraints = {@UniqueConstraint(columnNames = {"liker_id", "liked_id"})})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,11 +16,11 @@ public class UserLike {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "liker_id")
     private User liker;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "liked_id")
     private User liked;
 

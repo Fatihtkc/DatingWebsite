@@ -1,10 +1,10 @@
 package com.datingapp.backend.service;
 
-import com.datingapp.backend.model.UserLike;
+import com.datingapp.backend.dto.Like.UserLikeDTO;
 import java.util.List;
 
 public interface LikeService {
-    List<UserLike> getLikesByLiker(Long likerId);
-    UserLike addLike(Long likerId, Long likedId);
+    List<UserLikeDTO> getLikesByLiker(Long likerId);
+    UserLikeDTO addLike(Long likerId, Long likedId);
     void removeLike(Long likeId);
 }

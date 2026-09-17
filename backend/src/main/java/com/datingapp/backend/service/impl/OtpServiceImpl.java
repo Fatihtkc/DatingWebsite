@@ -1,6 +1,5 @@
 package com.datingapp.backend.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.datingapp.backend.model.Otp;
@@ -8,21 +7,23 @@ import com.datingapp.backend.repository.OtpRepository;
 import com.datingapp.backend.service.OtpService;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 
 @Service
+@RequiredArgsConstructor
 public class OtpServiceImpl implements OtpService {
 
-    @Autowired
-    private OtpRepository otpRepository;
+    private final OtpRepository otpRepository;
+    private final SecureRandom random = new SecureRandom();
 
     @Override
     public String generateOtp() {
-        return String.format("%06d", new Random().nextInt(1000000));
+        return String.format("%06d", random.nextInt(1000000));
     }
     
     @Override

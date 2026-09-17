@@ -1,15 +1,13 @@
 package com.datingapp.backend.service;
 
-import com.datingapp.backend.model.UserImage;
 import java.util.List;
 
-public interface UserImageService {
-    // Bir kullanıcıya ait tüm resimleri getir
-    List<UserImage> getImagesByUser(Long userId);
+import com.datingapp.backend.dto.ImageDTO;
 
-    UserImage getImageById(Long imageId);
-    List<UserImage> saveAll(List<UserImage> userImages);
-    List<UserImage> findByUserId(Long userId);
+public interface UserImageService {
+    ImageDTO getImageById(Long imageId);
+    List<ImageDTO> saveAll(Long userId, List<ImageDTO> userImages);
+    List<ImageDTO> findByUserId(Long userId);
     void deleteByUserId(Long userId);
 
 }

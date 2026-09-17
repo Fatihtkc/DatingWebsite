@@ -4,16 +4,20 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.datingapp.backend.enums.Role;
+
 import java.util.Collection;
 import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
 
+    private final Long id;
     private final String username;
     private final String password;
-    private final String role;
+    private final Role role;
 
-    public CustomUserDetails(String username, String password, String role){
+    public CustomUserDetails(Long id, String username, String password, Role role){
+        this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
@@ -21,8 +25,15 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Rol bilgisini "ROLE_" önekiyle döndürüyoruz.
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Role getRole() {
+        return role;
     }
 
     @Override
