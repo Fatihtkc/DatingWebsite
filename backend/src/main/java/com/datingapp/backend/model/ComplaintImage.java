@@ -20,14 +20,12 @@ public class ComplaintImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Resmin URL'si veya dosya yolu
     private String imageUrl;
 
-    // İlişkili kullanıcı
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id")
     @JsonIgnore
-     @ToString.Exclude            // Lombok’a bu alanı toString’a dahil etme
-    @EqualsAndHashCode.Exclude   // equals/hashCode’da da dahil etme
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Complaint complaint;
 }

@@ -8,6 +8,18 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
+
+import com.datingapp.backend.enums.Alcohol;
+import com.datingapp.backend.enums.BodyType;
+import com.datingapp.backend.enums.Diet;
+import com.datingapp.backend.enums.Gender;
+import com.datingapp.backend.enums.RelationshipType;
+import com.datingapp.backend.enums.Role;
+import com.datingapp.backend.enums.Smoking;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -18,14 +30,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Kişisel bilgiler
+    //Authentication
     @Column(nullable = false, length = 50, unique = true)
     private String username;
-
-    @Column(length = 120)
-    private String fullName;
-    private LocalDate birthDate;
-    private String gender;
 
     @Column(nullable = false, unique = true)
     @Email(message = "Geçerli bir email giriniz")
@@ -34,53 +41,75 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // Fiziksel özellikler
-    private Double height;
-    private Double weight;
-    private String bodyType;
-    
-    // Konum bilgisi (basitçe string olarak, detaylandırılabilir)
-    private String location;
-    
-    // İlişki tercihi ve aranan kriterler
-    @Column(name = "relationship_type")
-    private String relationshipType;
+    //Personal Information
+    @Column(length = 100)
+    private String firstName;
 
-    private String agePreference;    // örn: "25-35"
-    private String distancePreference; // örn: "50km"
+    @Column(length = 100)
+    private String lastName;
+
+    private LocalDate birthDate;
     
-    // Alışkanlıklar
-    private String smoke;
-    private String alcohol;
-    
-    // Hakkında kısmı
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private Double height;
+
+    private Double weight;
+
+    @Enumerated(EnumType.STRING)
+    private BodyType bodyType;
+
+    @Enumerated(EnumType.STRING)
+    private Diet diet;
+
+    private String hobbies;
+
+    private String favoriteMusic;
+
+    private String weekendPlans;
+
+    private String location;
+
     @Lob
-    private String shorterbio;
+    private String shorterBio;
     
-    // Kullanıcının yüklediği resimler
+    //Preferences
+    @Column(name = "relationship_type")
+    @Enumerated(EnumType.STRING)
+    private RelationshipType relationshipType;
+
+    private String agePreference;
+
+    private String distancePreference;
+    
+    //Habits
+    @Enumerated(EnumType.STRING)
+    private Smoking smoke;
+
+    @Enumerated(EnumType.STRING)
+    private Alcohol alcohol;
+
+    @JdbcTypeCode(SqlTypes.GEOMETRY)
+    @Column(name = "location_point", columnDefinition = "POINT SRID 4326")
+    private Point locationPoint;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserImage> images;
 
-    // Moderatör onayı için
+    //Moderation
     @Column(nullable = false)
     private boolean approved = false;
 
-    // Banlama durumu için
     @Column(nullable = false)
     private boolean banned = false;
 
     @Column(nullable = false)
     private boolean confirmed = false;
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
     private int personalityScore;
 
-    private String role="user";
-
-    private String diet;
-    private String hobbies;
-    private String favoriteMusic;
-    private String weekendPlans;
-
-    private double latitude;
-    private double longitude;
 }

@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "matches")
+@Table(name = "matches", uniqueConstraints = {@UniqueConstraint(columnNames = {"user1_id", "user2_id"})})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,12 +16,10 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    // İlk kullanıcı
     @ManyToOne
     @JoinColumn(name = "user1_id")
     private User user1;
     
-    // İkinci kullanıcı
     @ManyToOne
     @JoinColumn(name = "user2_id")
     private User user2;

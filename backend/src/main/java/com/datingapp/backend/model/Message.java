@@ -24,7 +24,12 @@ public class Message {
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
     
+    @Column(nullable = false)
     private String content;
+
+    @Column(nullable = false)
     private LocalDateTime sentAt;
+
+    @Column(nullable = false)
     private Boolean isImage;
 }

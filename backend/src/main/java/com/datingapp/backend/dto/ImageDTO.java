@@ -1,11 +1,11 @@
 package com.datingapp.backend.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class UserImageDTO {
+@NoArgsConstructor
+public class ImageDTO {
     private Long id;
     private String imageUrl;
-    // İsteğe bağlı: Kullanıcı ID'si de eklenebilir
-    private Long userId;
 }

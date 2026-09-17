@@ -1,40 +1,43 @@
 package com.datingapp.backend.service.impl;
 
+import com.datingapp.backend.dto.ManagerDTO;
+import com.datingapp.backend.dto.ModeratorDTO;
 import com.datingapp.backend.dto.PasswordChangeRequest;
+import com.datingapp.backend.dto.UserAdminDTO;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
+import com.datingapp.backend.mapper.ManagerMapper;
+import com.datingapp.backend.mapper.ModeratorMapper;
+import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.model.Manager;
 import com.datingapp.backend.model.Moderator;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.ManagerRepository;
 import com.datingapp.backend.repository.ModeratorRepository;
 import com.datingapp.backend.repository.UserRepository;
-import com.datingapp.backend.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.datingapp.backend.service.ManagerService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class AdminServiceImpl implements AdminService {
+@RequiredArgsConstructor
+public class ManagerServiceImpl implements ManagerService {
 
     private final ModeratorRepository moderatorRepo;
     private final ManagerRepository managerRepo;
     private final UserRepository userRepo;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    public AdminServiceImpl(ModeratorRepository moderatorRepo,
-                            ManagerRepository managerRepo,
-                            UserRepository userRepo) {
-        this.moderatorRepo = moderatorRepo;
-        this.managerRepo = managerRepo;
-        this.userRepo = userRepo;
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final ModeratorMapper moderatorMapper;
+    private final ManagerMapper managerMapper;
+    private final UserMapper userMapper;
 
     @Override
-    public Moderator hireModerator(Moderator moderator) {
+    public ModeratorDTO hireModerator(Moderator moderator) {
 
         Optional<Moderator> byEmail = moderatorRepo.findByEmail(moderator.getEmail());
         if (byEmail.isPresent()) {
@@ -47,7 +50,9 @@ public class AdminServiceImpl implements AdminService {
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
 
-        return moderatorRepo.save(moderator);
+        moderator.setPassword(passwordEncoder.encode(moderator.getPassword()));
+
+        return moderatorMapper.toDTO(moderatorRepo.save(moderator));
     }
 
     @Override
@@ -56,7 +61,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Moderator updateModerator(Long moderatorId, Moderator moderator) {
+    public ModeratorDTO updateModerator(Long moderatorId, Moderator moderator) {
         Moderator existing = moderatorRepo.findById(moderatorId)
             .orElseThrow(() -> new RuntimeException("Moderator not found"));
 
@@ -72,24 +77,25 @@ public class AdminServiceImpl implements AdminService {
         if (byPhone.isPresent() && !byPhone.get().getId().equals(moderatorId)) {
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
-        existing.setFullName(moderator.getFullName());
+        existing.setFirstName(moderator.getFirstName());
+        existing.setLastName(moderator.getLastName());
         existing.setEmail(moderator.getEmail());
         existing.setPhone(moderator.getPhone());
         if (moderator.getImageUrl() != null) {
             existing.setImageUrl(moderator.getImageUrl());
         }
-        return moderatorRepo.save(existing);
+        return moderatorMapper.toDTO(moderatorRepo.save(existing));
     }
 
     @Override
-    public List<Moderator> listAllModerators() {
-        return moderatorRepo.findAll();
+    public List<ModeratorDTO> listAllModerators() {
+        return moderatorRepo.findAll().stream().map(moderatorMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public Moderator getModeratorById(Long id) {
-        return moderatorRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Moderator not found with id: " + id));
+    public ModeratorDTO getModeratorById(Long id) {
+        return moderatorMapper.toDTO(moderatorRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Moderator not found with id: " + id)));
     }
 
     @Override
@@ -133,7 +139,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Manager hireManager(Manager manager) {
+    public ManagerDTO hireManager(Manager manager) {
 
         Optional<Manager> byEmail = managerRepo.findByEmail(manager.getEmail());
         if (byEmail.isPresent()) {
@@ -146,7 +152,10 @@ public class AdminServiceImpl implements AdminService {
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
 
-        return managerRepo.save(manager);
+        manager.setPassword(passwordEncoder.encode(manager.getPassword()));
+
+
+        return managerMapper.toDTO(managerRepo.save(manager));
     }
 
     @Override
@@ -155,7 +164,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Manager updateManager(Long managerId, Manager manager) {
+    public ManagerDTO updateManager(Long managerId, Manager manager) {
         Manager existing = managerRepo.findById(managerId)
             .orElseThrow(() -> new RuntimeException("Manager not found"));
 
@@ -171,40 +180,41 @@ public class AdminServiceImpl implements AdminService {
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
 
-        existing.setFullName(manager.getFullName());
+        existing.setFirstName(manager.getFirstName());
+        existing.setLastName(manager.getLastName());
         existing.setEmail(manager.getEmail());
         existing.setPhone(manager.getPhone());
         existing.setRole(manager.getRole());
         if (manager.getImageUrl() != null) {
             existing.setImageUrl(manager.getImageUrl());
         }
-        return managerRepo.save(existing);
+        return managerMapper.toDTO(managerRepo.save(existing));
     }
 
     @Override
-    public List<Manager> listAllManagers() {
-        return managerRepo.findAll();
+    public List<ManagerDTO> listAllManagers() {
+        return managerRepo.findAll().stream().map(managerMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public Manager getManagerById(Long id) {
-        return managerRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Manager not found with id: " + id));
+    public ManagerDTO getManagerById(Long id) {
+        return managerMapper.toDTO(managerRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Manager not found with id: " + id)));
     }
 
     @Override
-    public List<User> searchUsersByName(String name) {
-        return userRepo.findByFullNameContainingIgnoreCase(name);
+    public List<UserAdminDTO> searchUsersByName(String name) {
+        return userRepo.searchByFullName(name).stream().map(userMapper::toAdminDTO).collect(Collectors.toList());
     }
 
     @Override
-    public User updateUserInfo(Long userId, User user) {
+    public UserAdminDTO updateUserInfo(Long userId, User user) {
         User existing = userRepo.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        existing.setFullName(user.getFullName());
+        existing.setFirstName(user.getFirstName());
+        existing.setLastName(user.getLastName());
         existing.setLocation(user.getLocation());
-        existing.setShorterbio(user.getShorterbio());
-        // şifre hariç diğer alanlar...
-        return userRepo.save(existing);
+        existing.setShorterBio(user.getShorterBio());
+        return userMapper.toAdminDTO(userRepo.save(existing));
     }
 }

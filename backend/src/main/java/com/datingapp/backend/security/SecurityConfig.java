@@ -6,17 +6,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -42,10 +42,12 @@ public class SecurityConfig {
                 config.setAllowCredentials(true);
                 return config;
             }))
+            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session management
-            .authorizeRequests(auth -> auth
-                .requestMatchers("/**").permitAll() // Allow all requests
-                .requestMatchers("/login/**").permitAll() // Allow login requests
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/main/**").permitAll() // Allow public access to main endpoints
+                .requestMatchers("/login/**").permitAll() // Allow login requests-
+                .requestMatchers("/signup/**").permitAll() // Allow signup requests
                 .anyRequest().authenticated() // Require authentication for all other requests
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Add the JWT filter before authentication

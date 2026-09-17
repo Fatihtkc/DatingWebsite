@@ -11,21 +11,19 @@ import org.springframework.web.bind.annotation.*;
 import com.datingapp.backend.model.Token;
 import com.datingapp.backend.service.EmailService;
 import com.datingapp.backend.service.TokenService;
+
+import lombok.RequiredArgsConstructor;
+
 import com.datingapp.backend.service.OtpService;
 
 @RestController
 @RequestMapping("/api/token")
-public class EmailServiceController {
+@RequiredArgsConstructor
+public class VerificationController {
 
     private final TokenService tokenService;
     private final EmailService emailService;
     private final OtpService otpService;
-
-    public EmailServiceController(TokenService tokenService, EmailService emailService, OtpService otpService) {
-        this.tokenService = tokenService;
-        this.emailService = emailService;
-        this.otpService = otpService;
-    }
 
     // E-posta doğrulama linki gönder
     @PostMapping("/send-verification")

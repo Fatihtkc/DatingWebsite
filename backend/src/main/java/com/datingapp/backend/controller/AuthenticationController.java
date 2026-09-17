@@ -8,8 +8,12 @@ import com.datingapp.backend.security.JwtUtil;
 import com.datingapp.backend.service.LoginService;
 import com.datingapp.backend.dto.JwtResponse;
 import com.datingapp.backend.dto.LoginRequest;
+import com.datingapp.backend.enums.Role;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,16 +21,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000", methods = { RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS })
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-    @Autowired
-    private LoginService loginService; // Servis üzerinden kullanıcı/moderator/manager bilgilerini getiriyoruz
+    private final LoginService loginService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -34,7 +36,7 @@ public class AuthenticationController {
             System.out.println("Login request received for email: " + loginRequest.getEmail());
 
             Object foundEntity = null;
-            String role = null;
+            Role role = null;
             Long id = null;
             String username = null;
 
@@ -42,19 +44,19 @@ public class AuthenticationController {
             var optionalUser = loginService.findUserByEmail(loginRequest.getEmail());
             if (optionalUser.isPresent()) {
                 foundEntity = optionalUser.get();
-                role = "user";
+                role = Role.USER;
             } else {
                 // 2. Moderator kontrolü
                 var optionalModerator = loginService.findModeratorByEmail(loginRequest.getEmail());
                 if (optionalModerator.isPresent()) {
                     foundEntity = optionalModerator.get();
-                    role = "moderator";
+                    role = Role.MODERATOR;
                 } else {
                     // 3. Manager kontrolü
                     var optionalManager = loginService.findManagerByEmail(loginRequest.getEmail());
                     if (optionalManager.isPresent()) {
                         foundEntity = optionalManager.get();
-                        role = "manager";
+                        role = Role.MANAGER;
                     }
                 }
             }
@@ -74,31 +76,32 @@ public class AuthenticationController {
             } else if (foundEntity instanceof Moderator) {
                 storedPassword = ((Moderator) foundEntity).getPassword();
                 id = ((Moderator) foundEntity).getId();
+                username = ((Moderator) foundEntity).getEmail();
             } else if (foundEntity instanceof Manager) {
                 storedPassword = ((Manager) foundEntity).getPassword();
                 id = ((Manager) foundEntity).getId();
+                username = ((Manager) foundEntity).getEmail();
             }
 
             // 4. Şifre doğrulaması yapalım
             if (!passwordEncoder.matches(loginRequest.getPassword(), storedPassword)) {
-                System.out.println("Password mismatch for email: " + loginRequest.getEmail());
                 throw new BadCredentialsException("Invalid email or password");
             }
             System.out.println("Password match confirmed.");
 
             // 5. CustomUserDetails oluşturup token üreteceğiz
-            CustomUserDetails userDetails = new CustomUserDetails(email, storedPassword, role);
+            CustomUserDetails userDetails = new CustomUserDetails(id, username, storedPassword, role);
             String jwt = jwtUtil.generateJwtToken(userDetails);
-            System.out.println("JWT token generated: " + jwt);
 
             // Yanıt olarak token ve rol bilgisini gönderiyoruz.
             return ResponseEntity.ok(new JwtResponse(id,username,jwt, role));
         } catch (BadCredentialsException ex) {
-            System.out.println("Authentication error: " + ex.getMessage());
-            return ResponseEntity.status(401).body("Invalid email or password");
+            return ResponseEntity.status(401)
+            .body("Invalid email or password");
         } catch (Exception ex) {
-            System.out.println("Unexpected error during authentication: " + ex.getMessage());
-            return ResponseEntity.status(500).body("Internal Server Error: " + ex.getMessage());
+            return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Internal Server Error");
         }
     }
 }

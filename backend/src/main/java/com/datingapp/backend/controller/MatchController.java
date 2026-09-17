@@ -1,9 +1,14 @@
 package com.datingapp.backend.controller;
 
-import com.datingapp.backend.model.Match;
+import com.datingapp.backend.dto.Match.MatchDTO;
+import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.MatchService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,32 +16,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/matches")
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class MatchController {
 
     private final MatchService matchService;
-    public MatchController(MatchService matchService) { this.matchService = matchService; }
 
-    @GetMapping("/{userId}")
+    @GetMapping
     @PreAuthorize("#userId == principal.id")
-    public ResponseEntity<List<Match>> list(@PathVariable Long userId) {
+    public ResponseEntity<List<MatchDTO>> getMyMatches(@AuthenticationPrincipal CustomUserDetails principal) {
+        Long userId = principal.getId();
         return ResponseEntity.ok(matchService.getMatchesForUser(userId));
     }
 
     @PostMapping
-    public Match createMatch(@RequestParam Long user1Id, @RequestParam Long user2Id) {
+    @PreAuthorize("isAuthenticated()")
+    public MatchDTO createMatch(@AuthenticationPrincipal CustomUserDetails principal, @RequestParam Long user2Id) {
+        Long user1Id = principal.getId();
         return matchService.createMatch(user1Id, user2Id);
     }
 
-    @GetMapping("/{u1}/{u2}")
+    @GetMapping("/with/{otherUserId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Boolean> exists(@PathVariable Long u1, @PathVariable Long u2) {
-        return ResponseEntity.ok(matchService.isMatched(u1, u2));
+    public ResponseEntity<Boolean> IsMatched(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long otherUserId) {
+        Long userId = principal.getId();
+        return ResponseEntity.ok(matchService.isMatched(userId, otherUserId));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMatch(@PathVariable Long id) {
-    matchService.deleteMatch(id);
-    return ResponseEntity.noContent().build();
-}
+    @DeleteMapping("/{matchId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteMatch(@PathVariable Long matchId) {
+        matchService.deleteMatch(matchId);
+        return ResponseEntity.noContent().build();
+    }
 
 }

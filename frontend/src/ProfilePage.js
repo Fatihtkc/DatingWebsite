@@ -380,9 +380,9 @@ const ProfilePage = () => {
                             <label className="form-label2">Gender</label>
                             <select className="profile-input2" name="gender" value={formData.gender}
                                     onChange={handleChange}>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Non-binary">Non-binary</option>
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
+                                <option value="OTHER">Other</option>
                             </select>
                         </div>
 
@@ -390,9 +390,10 @@ const ProfilePage = () => {
                             <label className="form-label2">Looking For</label>
                             <select className="profile-input2" name="relationshipType" value={formData.relationshipType}
                                     onChange={handleChange}>
-                                <option value="Serious Relationship">Serious Relationship</option>
-                                <option value="Casual Dating">Casual Dating</option>
-                                <option value="Friendship">Friendship</option>
+                                <option value="SERIOUS_RELATIONSHIP">Serious Relationship</option>
+                                <option value="CASUAL_DATING">Casual Dating</option>
+                                <option value="FRIENDSHIP">Friendship</option>
+                                <option value="NO_PREFERENCE">No Preference</option>
                             </select>
                         </div>
 
@@ -422,16 +423,25 @@ const ProfilePage = () => {
 
                         <div className="form-group2">
                             <label className="form-label2">Body Type</label>
-                            <input className="profile-input2" type="text" name="bodyType" value={formData.bodyType}
-                                   onChange={handleChange}/>
+                            <select className="profile-input2" name="bodyType" value={formData.bodyType}
+                                    onChange={handleChange}>
+                                <option value="SLIM">Slim</option>
+                                <option value="AVERAGE">Average</option>
+                                <option value="ATHLETIC">Athletic</option>
+                                <option value="HEAVY">Heavy</option>
+                                <option value="NO_PREFERENCE">No Preference</option>
+                            </select>
                         </div>
 
                         <div className="form-group2">
                             <label className="form-label2">Do you smoke?</label>
                             <select className="profile-input2" name="smoke" value={formData.smoke}
                                     onChange={handleChange}>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
+                                <option value="NON_SMOKER">Non-Smoker</option>
+                                <option value="OCCASIONAL">Occasional</option>
+                                <option value="REGULAR">Regular</option>
+                                <option value="TRYING_TO_QUIT">Trying to Quit</option>
+                                <option value="NO_PREFERENCE">No Preference</option>
                             </select>
                         </div>
 
@@ -439,11 +449,27 @@ const ProfilePage = () => {
                             <label className="form-label2">Do you drink?</label>
                             <select className="profile-input2" name="alcohol" value={formData.alcohol}
                                     onChange={handleChange}>
-                                <option value="Occasionally">Occasionally</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
+                                <option value="NEVER">Never</option>
+                                <option value="SOMETIMES">Sometimes</option>
+                                <option value="REGULARLY">Regularly</option>
+                                <option value="NO_PREFERENCE">No Preference</option>
                             </select>
                         </div>
+
+                        <div className="form-group2">
+                            <label className="form-label2">Dietary Preferences</label>
+                            <select className="profile-input2" name="diet" value={formData.diet}
+                                    onChange={handleChange}>
+                                <option value="OMNIVORE">Omnivore</option>
+                                <option value="VEGETARIAN">Vegetarian</option>
+                                <option value="VEGAN">Vegan</option>
+                                <option value="PESCATARIAN">Pescatarian</option>
+                                <option value="FLEXITARIAN">Flexitarian</option>
+                                <option value="OTHER">Other</option>
+                                <option value="NO_PREFERENCE">No Preference</option>
+                            </select>
+                        </div>
+
                         <div className="form-group2">
                           <label className="form-label2">Location</label>
                           <input

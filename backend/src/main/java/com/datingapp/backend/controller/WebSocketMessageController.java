@@ -1,27 +1,29 @@
 package com.datingapp.backend.controller;
 
+import java.security.Principal;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
-import com.datingapp.backend.dto.MessageDTO;
+import com.datingapp.backend.dto.Message.MessageDTO;
+import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.MessageService;
 
+import lombok.RequiredArgsConstructor;
+
 @Controller
+@RequiredArgsConstructor
 public class WebSocketMessageController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
 
-    public WebSocketMessageController(SimpMessagingTemplate messagingTemplate, MessageService messageService) {
-        this.messagingTemplate = messagingTemplate;
-        this.messageService = messageService;
-    }
-
         @MessageMapping("/sendMessage")
-    public void receiveMessage(@Payload MessageDTO message) {
-        MessageDTO saved = messageService.saveMessage(message);
+    public void receiveMessage(@Payload MessageDTO message, @AuthenticationPrincipal CustomUserDetails principal) {
+        MessageDTO saved = messageService.saveMessage(principal, message);
 
         // Hem alıcıya bildirim
         messagingTemplate.convertAndSend(
@@ -29,6 +31,6 @@ public class WebSocketMessageController {
 
         // Hem gönderene de kaydedilmiş mesajı yolla
         messagingTemplate.convertAndSend(
-            "/topic/messages/" + message.getSenderId(), saved);
+            "/topic/messages/" + principal, saved);
     }
 }

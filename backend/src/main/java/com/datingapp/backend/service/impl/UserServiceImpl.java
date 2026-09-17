@@ -1,147 +1,185 @@
 package com.datingapp.backend.service.impl;
 
-import com.datingapp.backend.model.Manager;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.model.UserImage;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.UserService;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.datingapp.backend.dto.UserAdminDTO;
+import com.datingapp.backend.dto.User.NearbyUserDTO;
+import com.datingapp.backend.dto.User.UserCreateDTO;
+import com.datingapp.backend.dto.User.UserProfileDTO;
+import com.datingapp.backend.dto.User.UserUpdateDTO;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
 import com.datingapp.backend.exception.UserNotFoundException;
+import com.datingapp.backend.mapper.UserMapper;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    // Constructor Injection
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    @Override
+    public List<UserProfileDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+            .map(userMapper::toDTO)
+            .toList();
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public User getUserById(Long id) {
+    public UserProfileDTO getUserById(Long id) {
         return userRepository.findById(id)
+            .map(userMapper::toDTO)
             .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
+    private User getUserEntityById(Long id) {
+    return userRepository.findById(id)
+            .orElseThrow(() ->
+                    new UserNotFoundException(
+                            "User not found with id: " + id
+                    )
+            );
+    }
+
     @Override
-    public List<User> getAllActiveUsers() {
-        return userRepository.findByApprovedTrueAndBannedFalse();
+    public List<UserProfileDTO> getAllActiveUsers() {
+        return userRepository.findByApprovedTrueAndBannedFalse().stream()
+            .map(userMapper::toDTO)
+            .toList();
     }
 
     @Override
     public boolean checkUser(String email, String username){
 
-        Optional<User> byEmail = userRepository.findByEmail(email);
-        if (byEmail.isPresent()) {
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new UniqueConstraintViolationException("Email is already in use");
         }
-    
-        // Username kontrolü
-        Optional<User> byUsername = userRepository.findByUsername(username);
-        if (byUsername.isPresent()) {
+        if (userRepository.findByUsername(username).isPresent()) {
             throw new UniqueConstraintViolationException("Username is already in use");
         }
-
         return true;
+
     }
 
     @Override
-    public User createUser(User user) {
+    public User createUser(UserCreateDTO dto) {
 
-        String plainPassword = user.getPassword();
-        String encodedPassword = passwordEncoder.encode(plainPassword);
-        user.setPassword(encodedPassword);
+        User user = userMapper.toEntity(dto);
+
+        checkUser(user.getEmail(), user.getUsername());
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
     
 
-    public User updateUser(Long id, User user) {
-        User existingUser = getUserById(id);
+    @Override
+    public UserProfileDTO updateUser(Long id, UserUpdateDTO dto) {
 
-        // Temel kimlik bilgileri
-        existingUser.setUsername(user.getUsername());
-        existingUser.setFullName(user.getFullName());
-        existingUser.setBirthDate(user.getBirthDate());
-        existingUser.setGender(user.getGender());
+        User existingUser = getUserEntityById(id);
 
-        // Giriş bilgileri
-        existingUser.setEmail(user.getEmail());
-        // Eğer şifre güncelleniyorsa, encode edin:
-        // existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        existingUser.setPassword(user.getPassword());
+        existingUser.setFirstName(dto.getFirstName());
+        existingUser.setLastName(dto.getLastName());
+        existingUser.setBirthDate(dto.getBirthDate());
+        existingUser.setGender(dto.getGender());
 
-        // Fiziksel özellikler
-        existingUser.setHeight(user.getHeight());
-        existingUser.setWeight(user.getWeight());
-        existingUser.setBodyType(user.getBodyType());
+        existingUser.setHeight(dto.getHeight());
+        existingUser.setWeight(dto.getWeight());
+        existingUser.setBodyType(dto.getBodyType());
 
-        // Konum
-        existingUser.setLocation(user.getLocation());
+        existingUser.setLocation(dto.getLocation());
 
-        // İlişki tercihleri
-        existingUser.setRelationshipType(user.getRelationshipType());
-        existingUser.setAgePreference(user.getAgePreference());
-        existingUser.setDistancePreference(user.getDistancePreference());
+        existingUser.setRelationshipType(dto.getRelationshipType());
+        existingUser.setAgePreference(dto.getAgePreference());
+        existingUser.setDistancePreference(dto.getDistancePreference());
 
-        // Alışkanlıklar
-        existingUser.setSmoke(user.getSmoke());
-        existingUser.setAlcohol(user.getAlcohol());
+        existingUser.setSmoke(dto.getSmoke());
+        existingUser.setAlcohol(dto.getAlcohol());
 
-        // Hakkında
-        existingUser.setShorterbio(user.getShorterbio());
+        existingUser.setShorterBio(dto.getShorterBio());
 
-        // Diyet ve hobiler
-        existingUser.setDiet(user.getDiet());
-        existingUser.setHobbies(user.getHobbies());
-        existingUser.setFavoriteMusic(user.getFavoriteMusic());
-        existingUser.setWeekendPlans(user.getWeekendPlans());
+        existingUser.setDiet(dto.getDiet());
+        existingUser.setHobbies(dto.getHobbies());
+        existingUser.setFavoriteMusic(dto.getFavoriteMusic());
+        existingUser.setWeekendPlans(dto.getWeekendPlans());
 
-        // Moderasyon ve rol
-        existingUser.setApproved(user.isApproved());
-        existingUser.setBanned(user.isBanned());
-        existingUser.setPersonalityScore(user.getPersonalityScore());
-        existingUser.setRole(user.getRole());
+        User updatedUser = userRepository.save(existingUser);
 
-        // Resimler (OneToMany, orphanRemoval = true)
+        return userMapper.toDTO(updatedUser);
+    }
+
+    @Override
+    public List<NearbyUserDTO> getNearbyUsers(double latitude, double longitude, double distance) {
+
+        return userRepository
+                .findUsersWithinDistance(latitude, longitude, distance)
+                .stream()
+                .map(userMapper::toNearbyDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public UserAdminDTO adminUpdateUser(Long id, UserAdminDTO dto) {
+        User existingUser = getUserEntityById(id);
+
+        existingUser.setApproved(dto.isApproved());
+        existingUser.setBanned(dto.isBanned());
+        existingUser.setConfirmed(dto.isConfirmed());
+        existingUser.setPersonalityScore(dto.getPersonalityScore());
+        existingUser.setRole(dto.getRole());
+
+        User saved = userRepository.save(existingUser);
+        return userMapper.toAdminDTO(saved);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long id, String newPlainPassword) {
+        User existingUser = getUserEntityById(id);
+        existingUser.setPassword(passwordEncoder.encode(newPlainPassword));
+        userRepository.save(existingUser);
+    }
+
+
+    @Override
+    @Transactional
+    public UserProfileDTO updateUserImages(Long id, List<UserImage> images) {
+        User existingUser = getUserEntityById(id);
+
         existingUser.getImages().clear();
-        if (user.getImages() != null) {
-            for (UserImage img : user.getImages()) {
+        if (images != null) {
+            for (UserImage img : images) {
                 img.setUser(existingUser);
                 existingUser.getImages().add(img);
             }
         }
 
-        existingUser.setLatitude(user.getLatitude());
-        existingUser.setLongitude(user.getLongitude());
-
-        // Son olarak kaydet
-        return userRepository.save(existingUser);
-    }
-
-    @Override
-    public List<User> getNearbyUsers(double lat, double lon, double distance) {
-        return userRepository.findUsersWithinDistance(lat, lon, distance);
+        User saved = userRepository.save(existingUser);
+        return userMapper.toDTO(saved);
     }
 
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
         userRepository.deleteById(id);
     }
-}
 
+}

@@ -19,42 +19,42 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
     
-    // Secret key'den Key nesnesi oluştur
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+   private SecretKey getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     // JWT oluşturma
     public String generateJwtToken(UserDetails userDetails) {
-        SecretKey key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret)); // güvenli key oluştur
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 gün geçerli
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
+
     }
 
     // Token'dan kullanıcı adını (subject) alma
     public String getUsernameFromJwtToken(String token) {
-        Key key = getSigningKey();
+
         return Jwts.parserBuilder()
-                   .setSigningKey(key)
+                   .setSigningKey(getSigningKey())
                    .build()
                    .parseClaimsJws(token)
                    .getBody()
                    .getSubject();
+
     }
 
     // Token doğrulama
     public boolean validateJwtToken(String token) {
         try {
-            Key key = getSigningKey();
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // Hataları loglayabilirsiniz
+            return false;
         }
-        return false;
     }
 }

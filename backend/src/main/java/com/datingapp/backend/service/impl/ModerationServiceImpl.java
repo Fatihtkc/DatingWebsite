@@ -1,56 +1,63 @@
 package com.datingapp.backend.service.impl;
 
-import com.datingapp.backend.model.Complaint;
+import com.datingapp.backend.dto.UserAdminDTO;
+import com.datingapp.backend.dto.Complaint.ComplaintDTO;
+import com.datingapp.backend.mapper.ComplaintMapper;
+import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.ComplaintRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.ModerationService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ModerationServiceImpl implements ModerationService {
 
     private final UserRepository userRepository;
     private final ComplaintRepository complaintRepository;
-
-    public ModerationServiceImpl(UserRepository userRepository,
-                                 ComplaintRepository complaintRepository) {
-        this.userRepository = userRepository;
-        this.complaintRepository = complaintRepository;
-    }
+    private final UserMapper userMapper;
+    private final ComplaintMapper complaintMapper;
 
     @Override
-    public User approveUser(Long userId) {
+    public UserAdminDTO approveUser(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setApproved(true);       // Entity’de bir `approved` boolean alanı olmalı
+        user.setApproved(true);
         user.setBanned(false);
-        return userRepository.save(user);
+        return userMapper.toAdminDTO(userRepository.save(user));
     }
 
     @Override
-    public User banUser(Long userId) {
+    public UserAdminDTO banUser(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         user.setBanned(true);
-        return userRepository.save(user);
+        return userMapper.toAdminDTO(userRepository.save(user));
     }
 
     @Override
-    public List<User> listPendingUsers() {
-        return userRepository.findByApprovedFalse();  // repository’de bu metod tanımlı olmalı
+    public List<UserAdminDTO> listPendingUsers() {
+        return userRepository.findByApprovedFalse().stream()
+            .map(userMapper::toAdminDTO)
+            .toList();
     }
 
     @Override
-    public List<Complaint> listAllComplaints() {
-        return complaintRepository.findAll();
+    public List<ComplaintDTO> listAllComplaints() {
+        return complaintRepository.findAll().stream()
+            .map(complaintMapper::toDTO)
+            .toList();
     }
 
     @Override
-    public Complaint getComplaint(Long complaintId) {
-        return complaintRepository.findById(complaintId)
-            .orElseThrow(() -> new RuntimeException("Complaint not found"));
+    public ComplaintDTO getComplaint(Long complaintId) {
+        return complaintMapper.toDTO(complaintRepository.findById(complaintId)
+            .orElseThrow(() -> new RuntimeException("Complaint not found")));
     }
 
     @Override

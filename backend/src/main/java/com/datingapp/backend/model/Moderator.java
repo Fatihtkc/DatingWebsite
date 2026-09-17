@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
+import com.datingapp.backend.enums.Role;
+
 
 @Entity
 @Table(name = "moderators")
@@ -18,22 +20,25 @@ public class Moderator {
     private Long id;
     
     // Kişisel bilgiler
-    private String fullName;
+    private String firstName;
+    private String lastName;
 
     private String imageUrl;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     @Email(message = "Geçerli bir email giriniz")
     private String email;
     
     private LocalDate birthDate;
+    
     private LocalDate startDate;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String phone;
     
-    private String password; // Şifre, şifrelenmiş olarak saklanmalı
+    private String password;
 
-    private String role="moderator";
+    @Enumerated(EnumType.STRING)
+    private Role role=Role.MODERATOR;
 
 }
