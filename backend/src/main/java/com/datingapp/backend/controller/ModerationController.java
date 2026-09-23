@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/moderation")
+@RequestMapping("/api/moderation")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class ModerationController {

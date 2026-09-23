@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class UserController {
@@ -43,6 +44,7 @@ public class UserController {
 
     // Tüm kullanıcıları getir
     @GetMapping("/profiles") // Change the path
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<UserProfileDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

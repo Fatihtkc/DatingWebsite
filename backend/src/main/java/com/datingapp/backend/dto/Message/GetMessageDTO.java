@@ -7,10 +7,12 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class MessageDTO {
+public class GetMessageDTO {
     private Long id;
-    private Long receiverId;
+    private Long conversationId;
+    private Long senderId;
     private String content;
     private LocalDateTime sentAt;
     private Boolean isImage;
+    private Boolean isRead;
 }
