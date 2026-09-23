@@ -17,12 +17,12 @@ public class Message {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private Conversation conversation;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private User receiver;
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
     
     @Column(nullable = false)
     private String content;
@@ -32,4 +32,7 @@ public class Message {
 
     @Column(nullable = false)
     private Boolean isImage;
+
+    @Column(nullable = false)
+    private Boolean isRead = false;
 }

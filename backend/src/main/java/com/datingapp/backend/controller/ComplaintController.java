@@ -2,7 +2,6 @@ package com.datingapp.backend.controller;
 
 import com.datingapp.backend.dto.Complaint.ComplaintCreateDTO;
 import com.datingapp.backend.dto.Complaint.ComplaintDTO;
-import com.datingapp.backend.model.Complaint;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.ComplaintService;
 import jakarta.validation.Valid;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/complaints")
+@RequestMapping("/api/complaints")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class ComplaintController {

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/matches")
+@RequestMapping("/api/matches")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class MatchController {

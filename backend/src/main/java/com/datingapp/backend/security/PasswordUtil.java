@@ -1,19 +1,23 @@
 package com.datingapp.backend.security;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
+
+@Component
+@RequiredArgsConstructor
 public class PasswordUtil {
 
-    private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder encoder;
 
-    // Şifreyi şifrelemek
-    public static String encodePassword(String rawPassword) {
+    public String encodePassword(String rawPassword) {
         return encoder.encode(rawPassword);
     }
 
-    // Şifreyi doğrulamak
-    public static boolean checkPassword(String rawPassword, String encodedPassword) {
+    public boolean checkPassword(
+            String rawPassword,
+            String encodedPassword) {
         return encoder.matches(rawPassword, encodedPassword);
     }
 }

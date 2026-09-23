@@ -18,7 +18,7 @@ public class PasswordMigrationConfig {
             manRepository.findAll().forEach(user -> {
                 String plainPassword = user.getPassword();
                 // Eğer şifre hali hazırda encode edilmiş değilse (örneğin, belli bir deseni kontrol edebilirsiniz)
-                if (!plainPassword.startsWith("$2a$")) {  // BCrypt hash'leri "$2a$" ile başlar
+                if (!plainPassword.startsWith("$2a$ or $2b$ or $2y$")) {  // BCrypt hash'leri "$2a$" ile başlar
                     String encodedPassword = passwordEncoder.encode(plainPassword);
                     user.setPassword(encodedPassword);
                     manRepository.save(user);
@@ -35,7 +35,7 @@ public class PasswordMigrationConfig {
             modRepository.findAll().forEach(user -> {
                 String plainPassword = user.getPassword();
                 // Eğer şifre hali hazırda encode edilmiş değilse (örneğin, belli bir deseni kontrol edebilirsiniz)
-                if (!plainPassword.startsWith("$2a$")) {  // BCrypt hash'leri "$2a$" ile başlar
+                if (!plainPassword.startsWith("$2a$ or $2b$ or $2y$")) {  // BCrypt hash'leri "$2a$" ile başlar
                     String encodedPassword = passwordEncoder.encode(plainPassword);
                     user.setPassword(encodedPassword);
                     modRepository.save(user);
@@ -52,7 +52,7 @@ public class PasswordMigrationConfig {
             UserRepository.findAll().forEach(user -> {
                 String plainPassword = user.getPassword();
                 // Eğer şifre hali hazırda encode edilmiş değilse (örneğin, belli bir deseni kontrol edebilirsiniz)
-                if (!plainPassword.startsWith("$2a$")) {  // BCrypt hash'leri "$2a$" ile başlar
+                if (!plainPassword.startsWith("$2a$ or $2b$ or $2y$")) {  // BCrypt hash'leri "$2a$" ile başlar
                     String encodedPassword = passwordEncoder.encode(plainPassword);
                     user.setPassword(encodedPassword);
                     UserRepository.save(user);

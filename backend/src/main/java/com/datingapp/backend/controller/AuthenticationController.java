@@ -33,7 +33,8 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            System.out.println("Login request received for email: " + loginRequest.getEmail());
+            String email = loginRequest.getEmail();
+            System.out.println("Login request received for email: " + email);
 
             Object foundEntity = null;
             Role role = null;
@@ -41,19 +42,19 @@ public class AuthenticationController {
             String username = null;
 
             // 1. Önce User sınıfında arıyoruz.
-            var optionalUser = loginService.findUserByEmail(loginRequest.getEmail());
+            var optionalUser = loginService.findUserByEmail(email);
             if (optionalUser.isPresent()) {
                 foundEntity = optionalUser.get();
                 role = Role.USER;
             } else {
                 // 2. Moderator kontrolü
-                var optionalModerator = loginService.findModeratorByEmail(loginRequest.getEmail());
+                var optionalModerator = loginService.findModeratorByEmail(email);
                 if (optionalModerator.isPresent()) {
                     foundEntity = optionalModerator.get();
                     role = Role.MODERATOR;
                 } else {
                     // 3. Manager kontrolü
-                    var optionalManager = loginService.findManagerByEmail(loginRequest.getEmail());
+                    var optionalManager = loginService.findManagerByEmail(email);
                     if (optionalManager.isPresent()) {
                         foundEntity = optionalManager.get();
                         role = Role.MANAGER;
@@ -62,13 +63,12 @@ public class AuthenticationController {
             }
 
             if (foundEntity == null) {
-                System.out.println("User/Moderator/Manager not found for email: " + loginRequest.getEmail());
+                System.out.println("User/Moderator/Manager not found for email: " + email);
                 throw new BadCredentialsException("Invalid email or password");
             }
 
             // Şifreyi alın
             String storedPassword = "";
-            String email = loginRequest.getEmail(); // Kullanıcı adını genelde e-posta olarak alıyoruz
             if (foundEntity instanceof User) {
                 storedPassword = ((User) foundEntity).getPassword();
                 id = ((User) foundEntity).getId();
@@ -90,7 +90,7 @@ public class AuthenticationController {
             System.out.println("Password match confirmed.");
 
             // 5. CustomUserDetails oluşturup token üreteceğiz
-            CustomUserDetails userDetails = new CustomUserDetails(id, username, storedPassword, role);
+            CustomUserDetails userDetails = new CustomUserDetails(id, email, storedPassword, role);
             String jwt = jwtUtil.generateJwtToken(userDetails);
 
             // Yanıt olarak token ve rol bilgisini gönderiyoruz.

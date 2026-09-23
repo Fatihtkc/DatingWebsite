@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class UserImageController {
@@ -29,6 +29,7 @@ public class UserImageController {
     private final FileStorageService storage;
 
     @GetMapping("/me/images")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ImageDTO>> getMyImages(@AuthenticationPrincipal CustomUserDetails principal) {
         Long userId = principal.getId();
         return ResponseEntity.ok(userImageService.findByUserId(userId));
@@ -36,13 +37,14 @@ public class UserImageController {
 
     // Resimleri GET ile almak
     @GetMapping("/{userId}/images")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ImageDTO>> getImagesByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(userImageService.findByUserId(userId));
     }
 
     // Resim yüklemek (POST)
     @PostMapping(value = "/me/images", consumes = "multipart/form-data")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<List<ImageDTO>> replaceUserImages(@AuthenticationPrincipal CustomUserDetails principal, @RequestPart("images") List<MultipartFile> files) {
 
         Long userId = principal.getId();
