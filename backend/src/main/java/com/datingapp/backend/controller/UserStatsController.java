@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/stats")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
-public class UserStatsController {
+public class UserStatsController{
 
     private final UserStatsService userStatsService;
 
     @GetMapping
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<UserStatsDTO> getStats() {
+    public ResponseEntity<UserStatsDTO> getStats(){
         return ResponseEntity.ok(userStatsService.getStats());
     }
 }

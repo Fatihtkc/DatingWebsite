@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 import com.datingapp.backend.dto.Message.SendMessageDTO;
+import com.datingapp.backend.dto.Message.GetMessageDTO;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.MessageService;
 
@@ -22,7 +23,7 @@ public class WebSocketMessageController {
     @MessageMapping("/sendMessage")
     public void receiveMessage(@Payload SendMessageDTO message, @AuthenticationPrincipal CustomUserDetails principal) {
         
-        SendMessageDTO saved = messageService.saveMessage(principal, message);
+        GetMessageDTO saved = messageService.saveMessage(principal, message);
 
         messagingTemplate.convertAndSend("/topic/conversations/" + saved.getConversationId(),saved);
     }

@@ -2,15 +2,18 @@ package com.datingapp.backend.controller;
 
 import com.datingapp.backend.dto.UserAdminDTO;
 import com.datingapp.backend.dto.Complaint.ComplaintDTO;
-
+import com.datingapp.backend.model.UserImage;
 import com.datingapp.backend.service.ModerationService;
+import com.datingapp.backend.service.UserImageService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/moderation")
@@ -19,47 +22,65 @@ import java.util.List;
 public class ModerationController {
 
     private final ModerationService moderationService;
+    private final UserImageService userImageService;
 
-    // 1. Bekleyen profilleri listele
     @GetMapping("/pending-users")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<List<UserAdminDTO>> getPendingUsers() {
-        return ResponseEntity.ok(moderationService.listPendingUsers());
+    public ResponseEntity<Page<UserAdminDTO>> getPendingUsers(@PageableDefault(page = 0, size = 20) Pageable pageable){
+
+        return ResponseEntity.ok(moderationService.listPendingUsers(pageable));
     }
 
-    // 2. Profili onayla
     @PutMapping("/approve-user/{userId}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<UserAdminDTO> approveUser(@PathVariable Long userId) {
+    public ResponseEntity<UserAdminDTO> approveUser(@PathVariable Long userId){
+
         return ResponseEntity.ok(moderationService.approveUser(userId));
     }
 
-    // 3. Kullanıcıyı banla
     @PutMapping("/ban-user/{userId}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<UserAdminDTO> banUser(@PathVariable Long userId) {
+    public ResponseEntity<UserAdminDTO> banUser(@PathVariable Long userId){
+
         return ResponseEntity.ok(moderationService.banUser(userId));
     }
 
-    // 4. Tüm şikayetleri listele
     @GetMapping("/complaints")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<List<ComplaintDTO>> getAllComplaints() {
-        return ResponseEntity.ok(moderationService.listAllComplaints());
+    public ResponseEntity<Page<ComplaintDTO>> getAllComplaints(@PageableDefault(page = 0, size = 20) Pageable pageable){
+
+        return ResponseEntity.ok(moderationService.listAllComplaints(pageable));
     }
 
-    // 5. Şikayet detayı
     @GetMapping("/complaints/{complaintId}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<ComplaintDTO> getComplaint(@PathVariable Long complaintId) {
+    public ResponseEntity<ComplaintDTO> getComplaint(@PathVariable Long complaintId){
+
         return ResponseEntity.ok(moderationService.getComplaint(complaintId));
     }
 
-    // 6. Şikayeti sil
     @DeleteMapping("/complaints/{complaintId}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<Void> deleteComplaint(@PathVariable Long complaintId) {
+    public ResponseEntity<Void> deleteComplaint(@PathVariable Long complaintId){
+
         moderationService.deleteComplaint(complaintId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/moderation/pending-images")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('MANAGER')")
+    public ResponseEntity<Page<UserImage>> getPendingImages(@PageableDefault(page = 0, size = 20) Pageable pageable){
+
+        return ResponseEntity.ok(userImageService.getPendingImages(pageable));
+    }
+
+    @PutMapping("/moderation/images/{imageId}/approve")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('MANAGER')")
+    public ResponseEntity<Void> approveImage(@PathVariable Long imageId){
+
+        userImageService.approveImage(imageId);
+
         return ResponseEntity.noContent().build();
     }
 }

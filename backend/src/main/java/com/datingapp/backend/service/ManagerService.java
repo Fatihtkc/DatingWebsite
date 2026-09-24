@@ -7,27 +7,27 @@ import com.datingapp.backend.dto.UserAdminDTO;
 import com.datingapp.backend.model.Manager;
 import com.datingapp.backend.model.Moderator;
 import com.datingapp.backend.model.User;
-import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ManagerService {
-    // Moderatör yönetimi
-    ModeratorDTO hireModerator(Moderator moderator);
+    ModeratorDTO hireModerator(Moderator moderator, MultipartFile file);
     void fireModerator(Long moderatorId);
-    ModeratorDTO updateModerator(Long moderatorId, Moderator moderator);
+    ModeratorDTO updateModerator(Long moderatorId, Moderator moderator, MultipartFile file);
     ModeratorDTO getModeratorById(Long id);
     boolean updatePassword(PasswordChangeRequest request);
-    List<ModeratorDTO> listAllModerators();
+    Page<ModeratorDTO> listAllModerators(Pageable page);
 
-    // Manager yönetimi
-    ManagerDTO hireManager(Manager manager);
+    ManagerDTO hireManager(Manager manager, MultipartFile file);
     void fireManager(Long managerId);
-    ManagerDTO updateManager(Long managerId, Manager manager);
+    ManagerDTO updateManager(Long managerId, Manager manager, MultipartFile file);
     boolean updatePasswordManager(PasswordChangeRequest request);
-    List<ManagerDTO> listAllManagers();
+    Page<ManagerDTO> listAllManagers(Pageable page);
     ManagerDTO getManagerById(Long id);
 
-    // Kullanıcı arama ve güncelleme
-    List<UserAdminDTO> searchUsersByName(String name);
+    Page<UserAdminDTO> searchUsersByName(String name, Pageable page);
     UserAdminDTO updateUserInfo(Long userId, User user);
 
     

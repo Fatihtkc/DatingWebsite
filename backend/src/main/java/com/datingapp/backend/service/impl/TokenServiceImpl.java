@@ -25,20 +25,26 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public void createToken(User user, String token, Token.TokenType type, Duration validity) {
+
+        LocalDateTime expiryDate = LocalDateTime.now().plus(validity);
+
         Token t = new Token();
         t.setToken(token);
         t.setUser(user);
         t.setType(type);
-        t.setExpiryDate(LocalDateTime.now().plus(validity));
+        t.setExpiryDate(expiryDate);
         tokenRepository.save(t);
     }
 
     @Override
     public User validateToken(String token, Token.TokenType type) {
+
+        LocalDateTime now = LocalDateTime.now();
+
         return tokenRepository.findByTokenAndType(token, type)
-            .filter(t -> t.getExpiryDate().isAfter(LocalDateTime.now()))
-            .map(Token::getUser)
-            .orElseThrow(() -> new IllegalArgumentException("Token geçersiz veya süresi dolmuş"));
+            .filter(t -> t.getExpiryDate().isAfter(now))
+            .map(t -> t.getUser())
+            .orElseThrow(() -> new IllegalArgumentException("The token is invalid or has expired."));
     }
 
     @Override

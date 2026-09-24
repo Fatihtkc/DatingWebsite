@@ -1,19 +1,24 @@
-package com.datingapp.backend.security;
+package com.datingapp.backend.service.impl;
 
-import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.UserRepository;
+import com.datingapp.backend.security.CustomUserDetails;
+import com.datingapp.backend.service.CustomUserDetailsService;
+import com.datingapp.backend.repository.ModeratorRepository;
+import com.datingapp.backend.repository.ManagerRepository;
+
 
 import lombok.NoArgsConstructor;
 
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 
 @Service
 @NoArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements CustomUserDetailsService, UserDetailsService {
 
     private UserRepository userRepository;
+    private ModeratorRepository moderatorRepository;
+    private ManagerRepository managerRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

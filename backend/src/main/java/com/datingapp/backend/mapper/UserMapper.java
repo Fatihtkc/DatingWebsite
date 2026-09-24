@@ -9,6 +9,7 @@ import com.datingapp.backend.enums.Alcohol;
 import com.datingapp.backend.enums.BodyType;
 import com.datingapp.backend.enums.Diet;
 import com.datingapp.backend.enums.Gender;
+import com.datingapp.backend.enums.ModerationStatus;
 import com.datingapp.backend.enums.RelationshipType;
 import com.datingapp.backend.enums.Smoking;
 import com.datingapp.backend.model.User;
@@ -50,6 +51,7 @@ public class UserMapper {
             dto.setImages(
                 user.getImages()
                     .stream()
+                    .filter(img -> img.getModerationStatus() == ModerationStatus.APPROVED)
                     .map(userImageMapper::toDTO)
                     .toList()
             );
