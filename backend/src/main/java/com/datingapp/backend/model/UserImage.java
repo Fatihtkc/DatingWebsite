@@ -1,5 +1,6 @@
 package com.datingapp.backend.model;
 
+import com.datingapp.backend.enums.ModerationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -21,6 +22,10 @@ public class UserImage {
     private Long id;
 
     private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ModerationStatus moderationStatus = ModerationStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

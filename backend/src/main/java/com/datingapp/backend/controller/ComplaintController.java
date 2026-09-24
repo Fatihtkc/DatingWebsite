@@ -7,6 +7,9 @@ import com.datingapp.backend.service.ComplaintService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,21 +28,19 @@ public class ComplaintController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('MODERATOR','MANAGER')")
-    public ResponseEntity<List<ComplaintDTO>> listAllComplaints() {
-        return ResponseEntity.ok(compService.getAllComplaints());
+    public ResponseEntity<Page<ComplaintDTO>> listAllComplaints(@PageableDefault(page = 0, size = 20) Pageable pageable){
+        return ResponseEntity.ok(compService.getAllComplaints(pageable));
     }
 
-    // id ile şikayet getir
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('MODERATOR','MANAGER')")
-    public ResponseEntity<ComplaintDTO> getComplaintById(@PathVariable Long id) {
+    public ResponseEntity<ComplaintDTO> getComplaintById(@PathVariable Long id){
         return ResponseEntity.ok(compService.getComplaint(id));
     }
 
-    // Yeni şikayet oluştur
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ComplaintDTO> createComplaint(@RequestBody @Valid ComplaintCreateDTO dto,@AuthenticationPrincipal CustomUserDetails principal) {
+    public ResponseEntity<ComplaintDTO> createComplaint(@RequestBody @Valid ComplaintCreateDTO dto,@AuthenticationPrincipal CustomUserDetails principal){
 
         Long complainantId = principal.getId();
         ComplaintDTO createdComplaint = compService.createComplaint(complainantId,dto);
@@ -47,10 +48,9 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComplaint);
     }
     
-    // Şikayeti sil
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<Void> deleteComplaint(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteComplaint(@PathVariable Long id){
         compService.deleteComplaint(id);
         return ResponseEntity.noContent().build();
     }

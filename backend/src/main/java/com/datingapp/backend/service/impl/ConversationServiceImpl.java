@@ -6,6 +6,7 @@ import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.ConversationRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.ConversationService;
+import com.datingapp.backend.service.MatchService;
 import com.datingapp.backend.mapper.ConversationMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,18 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final ConversationMapper conversationMapper;
+    private final MatchService matchService;
 
     @Override
     public ConversationDTO getOrCreateConversation(Long userAId, Long userBId) {
 
         Long user1Id = Math.min(userAId, userBId);
         Long user2Id = Math.max(userAId, userBId);
+
+        if (!matchService.isMatched(user1Id, user2Id)){
+            throw new IllegalArgumentException(
+                    "Users are not matched"
+        );}
 
         Conversation conversation = conversationRepository
                 .findByUser1IdAndUser2Id(user1Id, user2Id)
@@ -47,7 +54,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationDTO getConversationForUser(Long conversationId, Long userId) {
+    public Conversation getConversationForUser(Long conversationId, Long userId) {
 
         Conversation conversation = conversationRepository
                 .findById(conversationId)
@@ -59,22 +66,7 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalArgumentException("User is not part of this conversation");
         }
 
-        return conversationMapper.toDTO(conversation);
-    }
-
-    @Override
-    public Conversation getConversationEntityForUser(Long conversationId, Long userId) {
-
-        Conversation conversation = conversationRepository
-                .findById(conversationId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Conversation not found"));
-
-        if (!conversation.getUser1().getId().equals(userId) && !conversation.getUser2().getId().equals(userId)) {
-
-            throw new IllegalArgumentException("User is not part of this conversation");
-        }
-
         return conversation;
     }
+
 }

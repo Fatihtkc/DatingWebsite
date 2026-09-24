@@ -11,8 +11,9 @@ import com.datingapp.backend.service.ModerationService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,17 +42,13 @@ public class ModerationServiceImpl implements ModerationService {
     }
 
     @Override
-    public List<UserAdminDTO> listPendingUsers() {
-        return userRepository.findByApprovedFalse().stream()
-            .map(userMapper::toAdminDTO)
-            .toList();
+    public Page<UserAdminDTO> listPendingUsers(Pageable pageable) {
+        return userRepository.findByApprovedFalse(pageable).map(userMapper::toAdminDTO);
     }
 
     @Override
-    public List<ComplaintDTO> listAllComplaints() {
-        return complaintRepository.findAll().stream()
-            .map(complaintMapper::toDTO)
-            .toList();
+    public Page<ComplaintDTO> listAllComplaints(Pageable pageable) {
+        return complaintRepository.findAll(pageable).map(complaintMapper::toDTO);
     }
 
     @Override

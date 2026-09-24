@@ -1,109 +1,43 @@
 package com.datingapp.backend.controller;
 
-import com.datingapp.backend.model.User;
-import com.datingapp.backend.model.Moderator;
-import com.datingapp.backend.model.Manager;
-import com.datingapp.backend.security.CustomUserDetails;
-import com.datingapp.backend.security.JwtUtil;
 import com.datingapp.backend.service.LoginService;
-import com.datingapp.backend.dto.JwtResponse;
+import com.datingapp.backend.dto.JwtResponseDTO;
 import com.datingapp.backend.dto.LoginRequest;
-import com.datingapp.backend.enums.Role;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", methods = { RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS })
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
     private final LoginService loginService;
 
-    private final JwtUtil jwtUtil;
-
-    private final PasswordEncoder passwordEncoder;
-
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            String email = loginRequest.getEmail();
-            System.out.println("Login request received for email: " + email);
+    public ResponseEntity<JwtResponseDTO> authenticateUser(
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request) {
 
-            Object foundEntity = null;
-            Role role = null;
-            Long id = null;
-            String username = null;
+        String ip = resolveIp(request);
 
-            // 1. Önce User sınıfında arıyoruz.
-            var optionalUser = loginService.findUserByEmail(email);
-            if (optionalUser.isPresent()) {
-                foundEntity = optionalUser.get();
-                role = Role.USER;
-            } else {
-                // 2. Moderator kontrolü
-                var optionalModerator = loginService.findModeratorByEmail(email);
-                if (optionalModerator.isPresent()) {
-                    foundEntity = optionalModerator.get();
-                    role = Role.MODERATOR;
-                } else {
-                    // 3. Manager kontrolü
-                    var optionalManager = loginService.findManagerByEmail(email);
-                    if (optionalManager.isPresent()) {
-                        foundEntity = optionalManager.get();
-                        role = Role.MANAGER;
-                    }
-                }
-            }
+        JwtResponseDTO response =
+                loginService.login(loginRequest, ip);
 
-            if (foundEntity == null) {
-                System.out.println("User/Moderator/Manager not found for email: " + email);
-                throw new BadCredentialsException("Invalid email or password");
-            }
+        return ResponseEntity.ok(response);
+    }
 
-            // Şifreyi alın
-            String storedPassword = "";
-            if (foundEntity instanceof User) {
-                storedPassword = ((User) foundEntity).getPassword();
-                id = ((User) foundEntity).getId();
-                username = ((User) foundEntity).getUsername();
-            } else if (foundEntity instanceof Moderator) {
-                storedPassword = ((Moderator) foundEntity).getPassword();
-                id = ((Moderator) foundEntity).getId();
-                username = ((Moderator) foundEntity).getEmail();
-            } else if (foundEntity instanceof Manager) {
-                storedPassword = ((Manager) foundEntity).getPassword();
-                id = ((Manager) foundEntity).getId();
-                username = ((Manager) foundEntity).getEmail();
-            }
+    private String resolveIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
 
-            // 4. Şifre doğrulaması yapalım
-            if (!passwordEncoder.matches(loginRequest.getPassword(), storedPassword)) {
-                throw new BadCredentialsException("Invalid email or password");
-            }
-            System.out.println("Password match confirmed.");
-
-            // 5. CustomUserDetails oluşturup token üreteceğiz
-            CustomUserDetails userDetails = new CustomUserDetails(id, email, storedPassword, role);
-            String jwt = jwtUtil.generateJwtToken(userDetails);
-
-            // Yanıt olarak token ve rol bilgisini gönderiyoruz.
-            return ResponseEntity.ok(new JwtResponse(id,username,jwt, role));
-        } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(401)
-            .body("Invalid email or password");
-        } catch (Exception ex) {
-            return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Internal Server Error");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
         }
+
+        return request.getRemoteAddr();
     }
 }
-
-

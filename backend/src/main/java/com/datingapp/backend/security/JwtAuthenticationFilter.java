@@ -8,6 +8,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.datingapp.backend.service.impl.CustomUserDetailsServiceImpl;
+
 import jakarta.servlet.FilterChain;
 
 import org.springframework.lang.NonNull;
@@ -27,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private CustomUserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)

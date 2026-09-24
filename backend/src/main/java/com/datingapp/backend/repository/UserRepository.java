@@ -7,6 +7,8 @@ import com.datingapp.backend.enums.RelationshipType;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.projection.NearbyUserProjection;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,29 +21,21 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<User> searchByFullName(@Param("name") String name);
+    Page<User> searchByFullName(@Param("name") String name, Pageable page);
 
-    // Belirli bir yaş aralığında kullanıcıları getirmek (birthDate hesaplaması yapılabilir)
-    // Örneğin: 1990 ile 2000 arasında doğan kullanıcılar (basit örnek, doğrudan tarih karşılaştırması)
     List<User> findByBirthDateBetween(java.time.LocalDate startDate, java.time.LocalDate endDate);
 
-    // Kullanıcı lokasyonuna göre arama (basit string eşleştirme)
     List<User> findByLocationContainingIgnoreCase(String location);
     
-    // İlişki türüne göre filtreleme
     List<User> findByRelationshipType(RelationshipType relationshipType);
 
-    // E-posta üzerinden kullanıcıyı getirmek için eklenen metod
     Optional<User> findByEmail(String email);
 
-    // Username üzerinden kullanıcıyı getirmek için eklenen metod
     Optional<User> findByUsername(String username);
 
-    // Onay bekleyen kullanıcıları getir
-    List<User> findByApprovedFalse();
+    Page<User> findByApprovedFalse(Pageable pageable);
 
-    // Onaylanmış ve banlı olmayan kullanıcıları getir
-    List<User> findByApprovedTrueAndBannedFalse();
+    Page<User> findByApprovedTrueAndBannedFalse(Pageable pageable);
 
     @Query("SELECT COUNT(u) FROM User u")
     Long countAllUsers();
@@ -74,7 +68,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
             ST_Distance_Sphere(
                 u.location_point,
-                ST_SRID(POINT(:longitude, :latitude), 4326)
+                ST_SRID(
+                    POINT(:longitude, :latitude),
+                    4326
+                )
             ) / 1000 AS distance
 
         FROM users u
@@ -82,14 +79,86 @@ public interface UserRepository extends JpaRepository<User, Long> {
         WHERE u.approved = true
         AND u.banned = false
         AND u.location_point IS NOT NULL
+        AND u.id != :requesterId
 
+        -- Bounding Box
+        AND ST_Y(u.location_point)
+            BETWEEN :latitude - (:distance / 111.0)
+            AND :latitude + (:distance / 111.0)
+
+        AND ST_X(u.location_point)
+            BETWEEN
+                :longitude -
+                (:distance / (111.0 * COS(RADIANS(:latitude))))
+            AND
+                :longitude +
+                (:distance / (111.0 * COS(RADIANS(:latitude))))
+
+        -- Block control
+        AND u.id NOT IN (
+            SELECT ub.blocked_id
+            FROM user_blocks ub
+            WHERE ub.blocker_id = :requesterId
+
+            UNION
+
+            SELECT ub.blocker_id
+            FROM user_blocks ub
+            WHERE ub.blocked_id = :requesterId
+        )
+
+        -- Real Distance
         HAVING distance <= :distance
 
         ORDER BY distance
-        """, nativeQuery = true)
-    List<NearbyUserProjection> findUsersWithinDistance(
+        """,
+        countQuery = """
+        SELECT COUNT(*)
+        FROM users u
+
+        WHERE u.approved = true
+        AND u.banned = false
+        AND u.location_point IS NOT NULL
+        AND u.id != :requesterId
+
+        AND ST_Y(u.location_point)
+            BETWEEN :latitude - (:distance / 111.0)
+            AND :latitude + (:distance / 111.0)
+
+        AND ST_X(u.location_point)
+            BETWEEN
+                :longitude -
+                (:distance / (111.0 * COS(RADIANS(:latitude))))
+            AND
+                :longitude +
+                (:distance / (111.0 * COS(RADIANS(:latitude))))
+
+        AND u.id NOT IN (
+            SELECT ub.blocked_id
+            FROM user_blocks ub
+            WHERE ub.blocker_id = :requesterId
+
+            UNION
+
+            SELECT ub.blocker_id
+            FROM user_blocks ub
+            WHERE ub.blocked_id = :requesterId
+        )
+
+        AND ST_Distance_Sphere(
+            u.location_point,
+            ST_SRID(
+                POINT(:longitude, :latitude),
+                4326
+            )
+        ) / 1000 <= :distance
+        """,
+        nativeQuery = true)
+    Page<NearbyUserProjection> findUsersWithinDistance(
+            @Param("requesterId") Long requesterId,
             @Param("latitude") double latitude,
             @Param("longitude") double longitude,
-            @Param("distance") double distance
+            @Param("distance") double distance,
+            Pageable pageable
     );
 }

@@ -21,7 +21,7 @@ public class ConversationController {
 
     @PostMapping("/{userId}")
     @PreAuthorize("#userId == principal.id")
-    public ResponseEntity<Long> createOrGetConversation(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long userId) {
+    public ResponseEntity<Long> createOrGetConversation(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long userId){
 
         ConversationDTO conversation = conversationService.getOrCreateConversation( principal.getId(), userId);
 

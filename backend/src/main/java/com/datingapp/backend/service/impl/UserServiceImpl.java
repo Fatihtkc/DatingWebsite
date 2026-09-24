@@ -8,6 +8,8 @@ import com.datingapp.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import com.datingapp.backend.dto.User.UserUpdateDTO;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
 import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.mapper.UserMapper;
+import com.datingapp.backend.service.UserBlockService;
 
 import java.util.List;
 
@@ -29,19 +32,24 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final UserBlockService userBlockService;
 
     @Override
-    public List<UserProfileDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-            .map(userMapper::toDTO)
-            .toList();
+    public Page<UserProfileDTO> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+            .map(userMapper::toDTO);
     }
 
     @Override
-    public UserProfileDTO getUserById(Long id) {
-        return userRepository.findById(id)
-            .map(userMapper::toDTO)
+    public UserProfileDTO getUserById(Long id, Long requesterId) {
+        User user = userRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        if (userBlockService.isBlockedBetween(requesterId, id)) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
+
+        return userMapper.toDTO(user);
     }
 
     private User getUserEntityById(Long id) {
@@ -54,10 +62,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserProfileDTO> getAllActiveUsers() {
-        return userRepository.findByApprovedTrueAndBannedFalse().stream()
-            .map(userMapper::toDTO)
-            .toList();
+    public Page<UserProfileDTO> getAllActiveUsers(Pageable pageable) {
+        return userRepository.findByApprovedTrueAndBannedFalse(pageable)
+            .map(userMapper::toDTO);
     }
 
     @Override
@@ -87,7 +94,7 @@ public class UserServiceImpl implements UserService {
     
 
     @Override
-    public UserProfileDTO updateUser(Long id, UserUpdateDTO dto) {
+    public UserProfileDTO updateUser(Long id, UserUpdateDTO dto){
 
         User existingUser = getUserEntityById(id);
 
@@ -122,18 +129,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<NearbyUserDTO> getNearbyUsers(double latitude, double longitude, double distance) {
+    public Page<NearbyUserDTO> getNearbyUsers(Long requesterId, double latitude, double longitude, double distance, Pageable pageable){
 
         return userRepository
-                .findUsersWithinDistance(latitude, longitude, distance)
-                .stream()
-                .map(userMapper::toNearbyDTO)
-                .toList();
+                .findUsersWithinDistance(requesterId, latitude, longitude, distance, pageable)
+                .map(userMapper::toNearbyDTO);
+
     }
 
     @Override
     @Transactional
-    public UserAdminDTO adminUpdateUser(Long id, UserAdminDTO dto) {
+    public UserAdminDTO adminUpdateUser(Long id, UserAdminDTO dto){
         User existingUser = getUserEntityById(id);
 
         existingUser.setApproved(dto.isApproved());
@@ -148,7 +154,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(Long id, String newPlainPassword) {
+    public void changePassword(Long id, String newPlainPassword){
         User existingUser = getUserEntityById(id);
         existingUser.setPassword(passwordEncoder.encode(newPlainPassword));
         userRepository.save(existingUser);
@@ -157,7 +163,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserProfileDTO updateUserImages(Long id, List<UserImage> images) {
+    public UserProfileDTO updateUserImages(Long id, List<UserImage> images){
         User existingUser = getUserEntityById(id);
 
         existingUser.getImages().clear();
@@ -175,7 +181,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id){
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException("User not found with id: " + id);
         }

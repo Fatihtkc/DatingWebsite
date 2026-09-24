@@ -15,6 +15,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,91 +39,97 @@ public class UserController {
 
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails principal) {
+    public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails principal){
 
         Long userId = principal.getId();
 
-        return ResponseEntity.ok(userService.getUserById(userId));
+        return ResponseEntity.ok(userService.getUserById(userId, principal.getId()));
+
     }
 
-    // Tüm kullanıcıları getir
-    @GetMapping("/profiles") // Change the path
+    @GetMapping("/profiles")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<UserProfileDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<Page<UserProfileDTO>> getAllUsers(@PageableDefault(page = 0, size = 20) Pageable pageable){
+
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
+
     }
 
-    // Aktif kullanıcıları getir
-    @GetMapping("/users/active") // Keep the original path
+    @GetMapping("/users/active") 
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<UserProfileDTO>> getAll() {
-        return ResponseEntity.ok(userService.getAllActiveUsers());
+    public ResponseEntity<Page<UserProfileDTO>> getAll(@PageableDefault(page = 0, size = 20) Pageable pageable){
+
+        return ResponseEntity.ok(userService.getAllActiveUsers(pageable));
+
     }
 
-    // Belirli bir kullanıcıyı ID ile getir
     @GetMapping("/users/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserProfileDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserProfileDTO> getById(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long id){
+        return ResponseEntity.ok(userService.getUserById(id, principal.getId()));
     }
 
     @GetMapping("/profile/{email}")
-    public ResponseEntity<UserProfileDTO> getByEmail(@PathVariable String email) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserProfileDTO> getByEmail(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable String email){
 
         Optional<User> optionalUser = loginService.findUserByEmail(email);
 
         return optionalUser
-            .map(user -> ResponseEntity.ok(userService.getUserById(user.getId())))
+            .map(user -> ResponseEntity.ok(userService.getUserById(user.getId(),principal.getId())))
             .orElseGet(() ->ResponseEntity.notFound().build());
+
     }
 
     @GetMapping("/check-user")
-    public ResponseEntity<?> checkUser(@RequestParam String email, @RequestParam String username) {
+    public ResponseEntity<?> checkUser(@RequestParam String email, @RequestParam String username){
+
         try {
             userService.checkUser(email, username);
             return ResponseEntity.ok().build();
         } catch (UniqueConstraintViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
+
     }
 
-    // Yeni kullanıcı oluştur
     @PostMapping("/signup")
-    public ResponseEntity<JwtResponse> createUser(@RequestBody @Valid UserCreateDTO dto) {
+    public ResponseEntity<JwtResponse> createUser(@RequestBody @Valid UserCreateDTO dto){
         User createdUser = userService.createUser(dto);
 
-        // 3. Kayıt olan kullanıcıyı UserDetails olarak yükle
         CustomUserDetails userDetails = new CustomUserDetails(createdUser.getId(), createdUser.getUsername(), createdUser.getPassword(), createdUser.getRole());
         String jwt = jwtUtil.generateJwtToken(userDetails);
 
         return ResponseEntity.ok(new JwtResponse(jwt, createdUser.getRole()));
     }
 
-    // Kullanıcı güncelle
     @PutMapping("/profile/{id}")
-    @PreAuthorize("#id == principal.id") // kendi profili
+    @PreAuthorize("#id == principal.id")
     public ResponseEntity<UserProfileDTO> update(@PathVariable Long id, @RequestBody @Valid UserUpdateDTO user) {
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
-    // Kullanıcı sil
     @DeleteMapping("/users/{id}")
     @PreAuthorize("#id == principal.id or hasRole('MODERATOR')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+
         userService.deleteUser(id);
+
         return ResponseEntity.noContent().build();
+
     }
     
     @GetMapping("/nearby")
-    public ResponseEntity<List<NearbyUserDTO>> getNearbyUsers(
-            @RequestParam double lat,
-            @RequestParam double lon,
-            @RequestParam(defaultValue = "50") double distanceKm) {
-        return ResponseEntity.ok(userService.getNearbyUsers(lat, lon, distanceKm));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<NearbyUserDTO>> getNearbyUsers(@AuthenticationPrincipal CustomUserDetails principal, @RequestParam double lat,
+            @RequestParam double lon, @RequestParam(defaultValue = "50") double distanceKm, @PageableDefault(page = 0, size = 20) Pageable pageable){
+
+        return ResponseEntity.ok(userService.getNearbyUsers(principal.getId(), lat, lon, distanceKm, pageable));
+
     }
 
-    // JWT yanıtı için DTO: Token'ın yanında rol bilgisini de gönderiyoruz.
     class JwtResponse {
+
         private String token;
         private Role role;
 

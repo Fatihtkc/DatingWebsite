@@ -10,16 +10,19 @@ import com.datingapp.backend.model.UserImage;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface UserService {
-    List<UserProfileDTO> getAllUsers();
-    UserProfileDTO getUserById(Long id);
+    Page<UserProfileDTO> getAllUsers(Pageable pageable);
+    UserProfileDTO getUserById(Long id, Long requesterId);
     User createUser(UserCreateDTO dto);
     UserProfileDTO updateUser(Long id, UserUpdateDTO dto);
     void deleteUser(Long id);
-    List<UserProfileDTO> getAllActiveUsers();
+    Page<UserProfileDTO> getAllActiveUsers(Pageable pageable);
     boolean checkUser(String email, String username);
-    List<NearbyUserDTO> getNearbyUsers(double lat, double lon, double distance);
+    Page<NearbyUserDTO> getNearbyUsers(Long requesterId, double lat, double lon, double distance, Pageable pageable);
     UserAdminDTO adminUpdateUser(Long id, UserAdminDTO dto);
     void changePassword(Long id, String newPlainPassword);
-    public UserProfileDTO updateUserImages(Long id, List<UserImage> images);
+    UserProfileDTO updateUserImages(Long id, List<UserImage> images);
 }

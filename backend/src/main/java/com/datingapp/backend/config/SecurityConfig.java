@@ -16,21 +16,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 
 import com.datingapp.backend.security.JwtAuthenticationFilter;
+import com.datingapp.backend.security.ratelimit.RateLimitFilter;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
 
     @Value("${app.require-ssl:false}")
     private boolean requireSsl;
-
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -75,19 +76,14 @@ public class SecurityConfig {
                     "/signup",
                     "/check-user"
                 ).permitAll()
-
                 .requestMatchers("/api/token/**")
                 .permitAll()
-
                 .anyRequest()
                 .authenticated()
             )
 
-            .addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class
-            )
-
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class)
             .build();
     }
 

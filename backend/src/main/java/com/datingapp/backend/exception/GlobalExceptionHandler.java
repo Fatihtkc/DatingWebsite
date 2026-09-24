@@ -13,7 +13,8 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex) {
+    public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex){
+        
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.NOT_FOUND.value());
@@ -24,18 +25,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UniqueConstraintViolationException.class)
-    public ResponseEntity<String> handleUniqueConstraintViolation(UniqueConstraintViolationException ex) {
+    public ResponseEntity<String> handleUniqueConstraintViolation(UniqueConstraintViolationException ex){
+
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleGeneralException(RuntimeException ex) {
+    public ResponseEntity<String> handleGeneralException(RuntimeException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Genel bir fallback (beklenmeyen hatalar için)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception ex) {
+    public ResponseEntity<?> handleGenericException(Exception ex){
+
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -43,5 +45,35 @@ public class GlobalExceptionHandler {
         error.put("message", ex.getMessage());
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ContentPolicyViolationException.class)
+    public ResponseEntity<String> handleContentPolicyViolation(ContentPolicyViolationException ex){
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(TooManyLoginAttemptsException.class)
+    public ResponseEntity<String> handleTooManyLoginAttempts(TooManyLoginAttemptsException ex){
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<String> handleInvalidOtp(InvalidOtpException ex){
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTokenTypeException.class)
+    public ResponseEntity<String> handleInvalidTokenType(InvalidTokenTypeException ex){
+
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<String> handleInvalidPassword(InvalidPasswordException ex){
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }
