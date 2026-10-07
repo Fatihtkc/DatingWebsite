@@ -14,10 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class RateLimitFilter extends OncePerRequestFilter{
 
     private final List<RateLimitRule> rules;
 
-    private final ConcurrentMap<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final Cache<String, Bucket> buckets = Caffeine.newBuilder().maximumSize(100_000).expireAfterAccess(Duration.ofMinutes(10)).build();
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -34,7 +36,7 @@ public class RateLimitFilter extends OncePerRequestFilter{
         for (RateLimitRule rule : rules){
             if (rule.matcher().test(request)){
                 String bucketKey = rule.name() + ":" + resolveKey(request, rule.keyStrategy());
-                Bucket bucket = buckets.computeIfAbsent(bucketKey, k -> newBucket(rule));
+                Bucket bucket = buckets.get(bucketKey, k -> newBucket(rule));
 
                 if (!bucket.tryConsume(1)){
                     response.setStatus(429);
@@ -61,24 +63,33 @@ public class RateLimitFilter extends OncePerRequestFilter{
 
     private String resolveKey(HttpServletRequest request, RateLimitRule.KeyStrategy strategy){
 
-        if (strategy == RateLimitRule.KeyStrategy.USER){
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())){
-                return auth.getName();
-            }
-            return resolveIp(request);
-        }
+        switch (strategy){
 
-        return resolveIp(request);
+            case USER:
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+                if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())){
+                    return auth.getName();
+                }
+
+                return resolveIp(request);
+
+            case EMAIL:
+                String email = request.getParameter("email");
+
+                if (email != null && !email.isBlank()){
+                    return email.trim().toLowerCase();
+                }
+
+                return resolveIp(request);
+
+            case IP:
+            default:
+                return resolveIp(request);
+        }
     }
 
-    private String resolveIp(HttpServletRequest request){
-
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim();
-        }
-        
+    private String resolveIp(HttpServletRequest request){ 
         return request.getRemoteAddr();
     }
 }

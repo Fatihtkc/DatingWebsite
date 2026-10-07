@@ -15,6 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.datingapp.backend.security.CustomAccessDeniedHandler;
+import com.datingapp.backend.security.CustomAuthenticationEntryPoint;
 import com.datingapp.backend.security.JwtAuthenticationFilter;
 import com.datingapp.backend.security.ratelimit.RateLimitFilter;
 
@@ -29,6 +31,11 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitFilter rateLimitFilter;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigin;
 
     @Value("${app.require-ssl:false}")
     private boolean requireSsl;
@@ -41,10 +48,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        if (requireSsl) {
-            http.requiresChannel(channel ->
-                channel.anyRequest().requiresSecure()
-            );
+        if (requireSsl){
+            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
         }
 
         return http
@@ -53,28 +58,25 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
 
-                config.setAllowedOrigins(
-                    List.of("http://localhost:3000")
-                );
-
-                config.setAllowedMethods(List.of("GET, POST, PUT, DELETE, OPTIONS"));
-                config.setAllowedHeaders(List.of("GET, POST, PUT, DELETE, OPTIONS"));
-                config.setAllowCredentials(true);
+                config.setAllowedOrigins(List.of(allowedOrigin));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+                config.setAllowCredentials(false);
 
                 return config;
             }))
 
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS
-                )
-            )
+            .sessionManagement(session -> session.sessionCreationPolicy( SessionCreationPolicy.STATELESS))
+
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/login",
+                    "/api/auth/login",
                     "/signup",
-                    "/check-user"
+                    "/check-user",
+                    "/api/auth/refresh",
+                    "/api/auth/logout"
                 ).permitAll()
                 .requestMatchers("/api/token/**")
                 .permitAll()
@@ -88,9 +90,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration
-    ) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
         return configuration.getAuthenticationManager();
     }
 }

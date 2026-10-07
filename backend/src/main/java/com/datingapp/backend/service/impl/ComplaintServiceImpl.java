@@ -7,10 +7,12 @@ import com.datingapp.backend.mapper.ImageMapper;
 import com.datingapp.backend.model.Complaint;
 import com.datingapp.backend.model.ComplaintImage;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.projection.ComplaintProjection;
 import com.datingapp.backend.repository.ComplaintRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.ComplaintService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -32,24 +34,28 @@ public class ComplaintServiceImpl implements ComplaintService{
     @Override
     public Page<ComplaintDTO> getAllComplaints(Pageable pageable){
 
-        return complaintRepository.findAll(pageable).map(complaintMapper::toDTO);
+        return complaintRepository.findAllComplaintProjections(pageable).map(complaintMapper::toDTO);
     }
     
     @Override
     public ComplaintDTO getComplaint(Long id){
 
-        return complaintRepository.findById(id).map(complaintMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Complaint not found with id: " + id));
+        ComplaintProjection projection = complaintRepository.findComplaintProjectionById(id);
+
+        if (projection == null){
+            throw new RuntimeException("Complaint not found with id: " + id);
+        }
+
+        return complaintMapper.toDTO(projection);
     }
 
     @Override
+    @Transactional 
     public ComplaintDTO createComplaint(Long complainantId, ComplaintCreateDTO dto){
         
-        User complainant = userRepository.findById(complainantId)
-                .orElseThrow(() -> new RuntimeException("Complainant not found"));
+        User complainant = userRepository.findById(complainantId).orElseThrow(() -> new RuntimeException("Complainant not found"));
 
-        User complained = userRepository.findById(dto.getComplainedId())
-                .orElseThrow(() -> new RuntimeException("Complained user not found"));
+        User complained = userRepository.findById(dto.getComplainedId()).orElseThrow(() -> new RuntimeException("Complained user not found"));
 
         Complaint complaint = new Complaint();
         complaint.setComplainant(complainant);
@@ -59,21 +65,22 @@ public class ComplaintServiceImpl implements ComplaintService{
 
         if (dto.getImages() != null){
 
-            List<ComplaintImage> images = dto.getImages()
-                    .stream()
-                    .map(imageMapper::toComplaintImageEntity)
-                    .toList();
+            List<ComplaintImage> images = dto.getImages().stream().map(imageMapper::toComplaintImageEntity).toList();
 
             for (ComplaintImage image : images){
                 complaint.addImage(image);
             }
         }
 
-        return complaintMapper.toDTO(complaintRepository.save(complaint));
+        Complaint savedComplaint = complaintRepository.save(complaint);
+        ComplaintProjection projection = complaintRepository.findComplaintProjectionById(savedComplaint.getId());
+
+        return complaintMapper.toDTO(projection);
     }
     
 
     @Override
+    @Transactional 
     public void deleteComplaint(Long id){
 
         if (!complaintRepository.existsById(id)) {

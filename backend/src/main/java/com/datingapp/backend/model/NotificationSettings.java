@@ -1,13 +1,20 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "notification_settings")
-@Data
+@Table(
+    name = "notification_settings",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_notification_settings_user", columnNames = "user_id")
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationSettings {

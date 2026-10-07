@@ -8,12 +8,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Date;
 import javax.crypto.SecretKey;
+
+import java.time.Duration;
 import java.util.Base64;
 
 @Component
 public class JwtUtil {
 
-    private int validationTime = 86400000; //1 day in a seconds
+    @Value("${jwt.access-token-ttl}")
+    private Duration accessTokenTtl;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -23,13 +26,12 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // JWT oluşturma
     public String generateJwtToken(UserDetails userDetails) {
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + validationTime))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenTtl.toMillis()))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
 

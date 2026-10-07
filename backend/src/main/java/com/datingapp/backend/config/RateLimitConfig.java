@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.datingapp.backend.security.ratelimit.RateLimitRule;
-import com.datingapp.backend.security.ratelimit.RateLimitRule.KeyStrategy;
 
 import java.time.Duration;
 import java.util.List;
@@ -36,7 +35,6 @@ public class RateLimitConfig {
                 RateLimitRule.KeyStrategy.IP
             ),
 
-
             new RateLimitRule(
                 "likes",
                 req -> req.getRequestURI().equals("/likes") && "POST".equalsIgnoreCase(req.getMethod()),
@@ -57,7 +55,64 @@ public class RateLimitConfig {
                     && ("POST".equalsIgnoreCase(req.getMethod()) || "PUT".equalsIgnoreCase(req.getMethod())),
                 10, Duration.ofMinutes(1),
                 RateLimitRule.KeyStrategy.USER
+            ),
+
+            new RateLimitRule(
+                "send-verification",
+                request -> request.getRequestURI().equals("/api/auth/send-verification"),
+                5,
+                Duration.ofMinutes(10),
+                RateLimitRule.KeyStrategy.IP
+            ),
+
+            new RateLimitRule(
+                "forgot-password",
+                request -> request.getRequestURI().equals("/api/auth/forgot-password"),
+                5,
+                Duration.ofMinutes(15),
+                RateLimitRule.KeyStrategy.IP
+            ),
+
+            new RateLimitRule(
+                "verify",
+                request -> request.getMethod().equals("POST") && request.getRequestURI().equals("/api/auth/verify"),
+                5,
+                Duration.ofMinutes(10),
+                RateLimitRule.KeyStrategy.IP
+            ),
+
+            new RateLimitRule(
+                "reset-password",
+                request -> request.getMethod().equals("POST") && request.getRequestURI().equals("/api/auth/reset-password"),
+                5,
+                Duration.ofMinutes(15),
+                RateLimitRule.KeyStrategy.IP
+            ),
+
+            new RateLimitRule(
+                "complaint",
+                request -> request.getMethod().equals("POST") && request.getRequestURI().equals("/api/complaints"),
+                5,
+                Duration.ofHours(1),
+                RateLimitRule.KeyStrategy.USER
+            ),
+
+            new RateLimitRule(
+                "profile-lookup",
+                request -> request.getMethod().equals("GET") && request.getRequestURI().matches("/api/users/\\d+"),
+                120,
+                Duration.ofMinutes(1),
+                RateLimitRule.KeyStrategy.USER
+            ),
+
+            new RateLimitRule(
+                "nearby",
+                request -> request.getMethod().equals("GET") && request.getRequestURI().equals("/api/users/nearby"),
+                30,
+                Duration.ofMinutes(1),
+                RateLimitRule.KeyStrategy.USER
             )
+
         );
     }
 }

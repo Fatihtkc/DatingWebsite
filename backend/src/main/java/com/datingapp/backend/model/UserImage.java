@@ -4,15 +4,22 @@ import com.datingapp.backend.enums.ModerationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "user_images")
-@Data
+@Table(
+    name = "user_images",
+    indexes = {
+        @Index(name = "idx_user_image_user_id_id", columnList = "user_id, id")
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserImage {
@@ -21,6 +28,7 @@ public class UserImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)

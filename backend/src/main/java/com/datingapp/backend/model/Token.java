@@ -1,25 +1,26 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Token {
 
-    public enum TokenType {
-        PASSWORD_RESET
-    }
+    public enum TokenType {PASSWORD_RESET}
 
     @Id
-    private String token;
+    private String hashToken;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
     private User user;
 
     @Enumerated(EnumType.STRING)
@@ -29,12 +30,11 @@ public class Token {
 
     public void setExpiryDate(LocalDateTime expiryDate) {
         if (expiryDate == null) {
-            throw new IllegalArgumentException("Son kullanma tarihi null olamaz");
+            throw new IllegalArgumentException("The expiration date cannot be null.");
         }
         this.expiryDate = expiryDate;
     }
     
-    // İsteğe bağlı olarak expiryDate değerini almak için bir getter metodu ekleyebilirsiniz
     public LocalDateTime getExpiryDate() {
         return this.expiryDate;
     }

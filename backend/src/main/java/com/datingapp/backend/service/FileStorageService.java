@@ -5,8 +5,7 @@ import java.util.List;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.datingapp.backend.service.records.BatchUploadResult;
-
+import com.datingapp.backend.records.BatchUploadResult;
 
 public interface FileStorageService {
 

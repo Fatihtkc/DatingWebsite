@@ -1,10 +1,11 @@
-package com.datingapp.backend.dto;
+package com.datingapp.backend.dto.User;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.datingapp.backend.dto.ImageDTO;
 import com.datingapp.backend.enums.Role;
 
 @Data

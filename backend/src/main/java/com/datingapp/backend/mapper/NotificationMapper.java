@@ -1,7 +1,7 @@
 package com.datingapp.backend.mapper;
 
-import com.datingapp.backend.dto.NotificationDTO;
-import com.datingapp.backend.dto.NotificationSettingsDTO;
+import com.datingapp.backend.dto.Notification.NotificationDTO;
+import com.datingapp.backend.dto.Notification.NotificationSettingsDTO;
 import com.datingapp.backend.model.Notification;
 import com.datingapp.backend.model.NotificationSettings;
 

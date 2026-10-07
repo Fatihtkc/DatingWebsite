@@ -16,48 +16,41 @@ public class VerificationController {
 
     private final VerificationService verificationService;
 
-    @PostMapping("/send-verification")
-    public ResponseEntity<String> sendVerification(
-            @RequestParam String email) {
+    @PostMapping("/api/auth/send-verification")
+    public ResponseEntity<String> sendVerification(@RequestParam String email){
 
         verificationService.sendVerificationCode(email);
 
         return ResponseEntity.ok("OTP sent to email.");
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<String> verifyOtp(
-            @RequestParam String email,
-            @RequestParam String code) {
+    @PostMapping("/api/auth/verify")
+    public ResponseEntity<String> verifyOtp( @RequestParam String email,@RequestParam String otp){
 
-        verificationService.verifyOtp(email, code);
+        verificationService.verifyOtp(email, otp);
 
         return ResponseEntity.ok("OTP verified successfully.");
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping("/api/auth/forgot-password")
     public ResponseEntity<String> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
 
         verificationService.forgotPassword(request.getEmail());
 
-        return ResponseEntity.ok("Password reset link sent.");
+        return ResponseEntity.ok("If the account exists, a password reset email has been sent.");
     }
 
-    @GetMapping("/validate")
-    public ResponseEntity<String> validateToken(
-            @RequestParam String token,
-            @RequestParam String type) {
+    @GetMapping("/api/auth/validate")
+    public ResponseEntity<String> validateToken(@RequestParam String token, @RequestParam String type){
 
         verificationService.validateToken(token, type);
 
         return ResponseEntity.ok("Token is valid.");
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(
-            @RequestParam String token,
-            @RequestParam String newPassword) {
+    @PostMapping("/api/auth/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword){
 
         verificationService.resetPassword(token, newPassword);
 

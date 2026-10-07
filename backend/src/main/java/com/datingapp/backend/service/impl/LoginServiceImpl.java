@@ -3,7 +3,7 @@ package com.datingapp.backend.service.impl;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.model.Moderator;
 import com.datingapp.backend.dto.JwtResponseDTO;
-import com.datingapp.backend.dto.LoginRequest;
+import com.datingapp.backend.dto.LoginRequestDTO;
 import com.datingapp.backend.enums.Role;
 import com.datingapp.backend.exception.TooManyLoginAttemptsException;
 import com.datingapp.backend.model.Manager;
@@ -15,6 +15,7 @@ import com.datingapp.backend.security.JwtUtil;
 import com.datingapp.backend.security.PasswordUtil;
 import com.datingapp.backend.service.LoginAttemptService;
 import com.datingapp.backend.service.LoginService;
+import com.datingapp.backend.service.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,12 +33,13 @@ public class LoginServiceImpl implements LoginService {
     private final ManagerRepository managerRepository;
     private final PasswordUtil passwordUtil;
     private final LoginAttemptService loginAttemptService;
+    private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
 
-    private record LoginUser(Long id, String username, String password, Role role) {}
+    private record LoginUser(Long id, String username, String password, Role role, boolean banned) {}
 
     @Override
-    public JwtResponseDTO login(LoginRequest loginRequest, String ip){
+    public JwtResponseDTO login(LoginRequestDTO loginRequest, String ip){
 
         String email = loginRequest.getEmail();
 
@@ -58,11 +60,12 @@ public class LoginServiceImpl implements LoginService {
 
         loginAttemptService.recordAttempt(email, ip, true);
 
-        CustomUserDetails userDetails = new CustomUserDetails(loginUser.id(), email, loginUser.password(), loginUser.role());
+        CustomUserDetails userDetails = new CustomUserDetails(loginUser.id(), email, loginUser.password(), loginUser.role(), loginUser.banned());
 
         String jwt = jwtUtil.generateJwtToken(userDetails);
+        String refreshToken = refreshTokenService.create(userDetails.getUsername());
 
-        return new JwtResponseDTO(loginUser.id(), loginUser.username(), jwt, loginUser.role());
+        return new JwtResponseDTO(loginUser.id(), loginUser.username(), jwt, refreshToken, loginUser.role());
     }
 
     private LoginUser findLoginUser(String email){
@@ -72,7 +75,8 @@ public class LoginServiceImpl implements LoginService {
                         user.getId(),
                         user.getUsername(),
                         user.getPassword(),
-                        Role.USER
+                        Role.USER,
+                        user.isBanned()
                 ))
                 .orElseGet(() ->
                         moderatorRepository.findByEmail(email)
@@ -80,7 +84,8 @@ public class LoginServiceImpl implements LoginService {
                                         moderator.getId(),
                                         moderator.getEmail(),
                                         moderator.getPassword(),
-                                        Role.MODERATOR
+                                        Role.MODERATOR,
+                                        false
                                 ))
                                 .orElseGet(() ->
                                         managerRepository.findByEmail(email)
@@ -88,7 +93,8 @@ public class LoginServiceImpl implements LoginService {
                                                         manager.getId(),
                                                         manager.getEmail(),
                                                         manager.getPassword(),
-                                                        Role.MANAGER
+                                                        Role.MANAGER,
+                                                        false
                                                 ))
                                                 .orElseThrow(() ->new BadCredentialsException("Invalid email or password")
                                 )

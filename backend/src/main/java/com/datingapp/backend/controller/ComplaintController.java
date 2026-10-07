@@ -16,11 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/complaints")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class ComplaintController {
 
@@ -40,7 +37,7 @@ public class ComplaintController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ComplaintDTO> createComplaint(@RequestBody @Valid ComplaintCreateDTO dto,@AuthenticationPrincipal CustomUserDetails principal){
+    public ResponseEntity<ComplaintDTO> createComplaint(@RequestBody @Valid ComplaintCreateDTO dto, @AuthenticationPrincipal CustomUserDetails principal){
 
         Long complainantId = principal.getId();
         ComplaintDTO createdComplaint = compService.createComplaint(complainantId,dto);
@@ -51,7 +48,9 @@ public class ComplaintController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MODERATOR')")
     public ResponseEntity<Void> deleteComplaint(@PathVariable Long id){
+        
         compService.deleteComplaint(id);
+
         return ResponseEntity.noContent().build();
     }
 }

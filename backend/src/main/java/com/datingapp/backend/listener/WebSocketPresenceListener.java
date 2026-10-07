@@ -1,6 +1,8 @@
-package com.datingapp.backend.websocket;
+package com.datingapp.backend.listener;
 
 import com.datingapp.backend.security.CustomUserDetails;
+import com.datingapp.backend.websocket.WebSocketPresenceRegistry;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,12 +17,12 @@ public class WebSocketPresenceListener {
 
     private final WebSocketPresenceRegistry presenceRegistry;
 
-    public WebSocketPresenceListener(WebSocketPresenceRegistry presenceRegistry) {
+    public WebSocketPresenceListener(WebSocketPresenceRegistry presenceRegistry){
         this.presenceRegistry = presenceRegistry;
     }
 
     @EventListener
-    public void handleConnect(SessionConnectedEvent event) {
+    public void handleConnect(SessionConnectedEvent event){
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         Long userId = extractUserId(accessor.getUser());
         if (userId != null) {
@@ -29,7 +31,7 @@ public class WebSocketPresenceListener {
     }
 
     @EventListener
-    public void handleDisconnect(SessionDisconnectEvent event) {
+    public void handleDisconnect(SessionDisconnectEvent event){
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         Long userId = extractUserId(accessor.getUser());
         if (userId != null) {
@@ -37,9 +39,8 @@ public class WebSocketPresenceListener {
         }
     }
 
-    private Long extractUserId(Principal principal) {
-        if (principal instanceof UsernamePasswordAuthenticationToken token
-                && token.getPrincipal() instanceof CustomUserDetails userDetails) {
+    private Long extractUserId(Principal principal){
+        if (principal instanceof UsernamePasswordAuthenticationToken token && token.getPrincipal() instanceof CustomUserDetails userDetails){
             return userDetails.getId();
         }
         return null;

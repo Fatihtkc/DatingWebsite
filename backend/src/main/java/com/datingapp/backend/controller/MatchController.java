@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/matches")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class MatchController {
 
@@ -46,8 +45,10 @@ public class MatchController {
 
     @DeleteMapping("/{matchId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> deleteMatch(@PathVariable Long matchId){
-        matchService.deleteMatch(matchId);
+    public ResponseEntity<Void> deleteMatch(@PathVariable Long matchId, @AuthenticationPrincipal CustomUserDetails principal){
+
+        matchService.deleteMatch(matchId, principal.getId());
+        
         return ResponseEntity.noContent().build();
     }
 

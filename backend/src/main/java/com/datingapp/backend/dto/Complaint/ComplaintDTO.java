@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.datingapp.backend.dto.ImageDTO;
-import com.datingapp.backend.dto.UserAdminDTO;
+import com.datingapp.backend.dto.User.UserAdminDTO;
 
 @Data
 @NoArgsConstructor

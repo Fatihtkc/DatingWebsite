@@ -2,6 +2,7 @@ package com.datingapp.backend.service.impl;
 
 import com.datingapp.backend.model.Conversation;
 import com.datingapp.backend.dto.Message.ConversationDTO;
+import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.ConversationRepository;
 import com.datingapp.backend.repository.UserRepository;
@@ -10,7 +11,12 @@ import com.datingapp.backend.service.MatchService;
 import com.datingapp.backend.mapper.ConversationMapper;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,33 +28,34 @@ public class ConversationServiceImpl implements ConversationService {
     private final MatchService matchService;
 
     @Override
+    @Transactional
     public ConversationDTO getOrCreateConversation(Long userAId, Long userBId) {
 
         Long user1Id = Math.min(userAId, userBId);
         Long user2Id = Math.max(userAId, userBId);
 
         if (!matchService.isMatched(user1Id, user2Id)){
-            throw new IllegalArgumentException(
-                    "Users are not matched"
-        );}
+            throw new IllegalArgumentException("Users are not matched");
+        }
 
-        Conversation conversation = conversationRepository
-                .findByUser1IdAndUser2Id(user1Id, user2Id)
-                .orElseGet(() -> {
+        Optional<Conversation> existing = conversationRepository.findByUser1IdAndUser2Id(user1Id, user2Id);
 
-                    User user1 = userRepository.findById(user1Id)
-                            .orElseThrow(() -> new IllegalArgumentException("User 1 not found"));
+        if (existing.isPresent()){
+            return conversationMapper.toDTO(existing.get());
+        }
 
-                    User user2 = userRepository.findById(user2Id)
-                            .orElseThrow(() -> new IllegalArgumentException("User 2 not found"));
+        User user1 = userRepository.findById(user1Id).orElseThrow(() -> new UserNotFoundException("User 1 not found"));
+        User user2 = userRepository.findById(user2Id).orElseThrow(() -> new UserNotFoundException("User 2 not found"));
 
-                    Conversation newConversation = new Conversation();
+        Conversation conversation = new Conversation();
+        conversation.setUser1(user1);
+        conversation.setUser2(user2);
 
-                    newConversation.setUser1(user1);
-                    newConversation.setUser2(user2);
-
-                    return conversationRepository.save(newConversation);
-                });
+        try {
+            conversation = conversationRepository.saveAndFlush(conversation);
+        } catch (DataIntegrityViolationException e){
+            conversation = conversationRepository.findByUser1IdAndUser2Id(user1Id, user2Id).orElseThrow(() -> e);
+        }
 
         return conversationMapper.toDTO(conversation);
     }

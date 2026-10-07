@@ -1,7 +1,7 @@
 package com.datingapp.backend.controller;
 
-import com.datingapp.backend.dto.UserAdminDTO;
 import com.datingapp.backend.dto.Complaint.ComplaintDTO;
+import com.datingapp.backend.dto.User.UserAdminDTO;
 import com.datingapp.backend.model.UserImage;
 import com.datingapp.backend.service.ModerationService;
 import com.datingapp.backend.service.UserImageService;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/moderation")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class ModerationController {
 
@@ -50,22 +49,6 @@ public class ModerationController {
     public ResponseEntity<Page<ComplaintDTO>> getAllComplaints(@PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(moderationService.listAllComplaints(pageable));
-    }
-
-    @GetMapping("/complaints/{complaintId}")
-    @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<ComplaintDTO> getComplaint(@PathVariable Long complaintId){
-
-        return ResponseEntity.ok(moderationService.getComplaint(complaintId));
-    }
-
-    @DeleteMapping("/complaints/{complaintId}")
-    @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<Void> deleteComplaint(@PathVariable Long complaintId){
-
-        moderationService.deleteComplaint(complaintId);
-
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/moderation/pending-images")

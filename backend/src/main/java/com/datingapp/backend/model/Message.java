@@ -1,16 +1,23 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(
+    name = "messages",
+    indexes = {
+        @Index(name = "idx_message_conversation_sent_at", columnList = "conversation_id, sent_at")
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "messages")
-@Data
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

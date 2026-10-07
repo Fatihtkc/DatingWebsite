@@ -1,9 +1,12 @@
 package com.datingapp.backend.service.impl;
 
-import com.datingapp.backend.dto.ManagerDTO;
-import com.datingapp.backend.dto.ModeratorDTO;
-import com.datingapp.backend.dto.PasswordChangeRequest;
-import com.datingapp.backend.dto.UserAdminDTO;
+import com.datingapp.backend.dto.PasswordChangeRequestDTO;
+import com.datingapp.backend.dto.Manager.ManagerCreateDTO;
+import com.datingapp.backend.dto.Manager.ManagerUpdateDTO;
+import com.datingapp.backend.dto.Moderator.ModeratorCreateDTO;
+import com.datingapp.backend.dto.Moderator.ModeratorUpdateDTO;
+import com.datingapp.backend.dto.User.UserAdminDTO;
+import com.datingapp.backend.enums.Role;
 import com.datingapp.backend.exception.InvalidPasswordException;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
 import com.datingapp.backend.mapper.ManagerMapper;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -44,27 +48,32 @@ public class ManagerServiceImpl implements ManagerService {
     private final FileStorageService storage;
 
     @Override
-    public ModeratorDTO hireModerator(Moderator moderator, MultipartFile file){
+    public ModeratorUpdateDTO hireModerator(ModeratorCreateDTO dto, MultipartFile file){
 
-        Optional<Moderator> byEmail = moderatorRepo.findByEmail(moderator.getEmail());
-        if (byEmail.isPresent()) {
+        if (moderatorRepo.findByEmail(dto.getEmail()).isPresent()){
             throw new UniqueConstraintViolationException("Email is already in use");
         }
-    
-        Optional<Moderator> byPhone = moderatorRepo.findByPhone(moderator.getPhone());
-        if (byPhone.isPresent()) {
+
+        if (moderatorRepo.findByPhone(dto.getPhone()).isPresent()){
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
 
-        moderator.setPassword(passwordEncoder.encode(moderator.getPassword()));
+        Moderator moderator = moderatorMapper.toEntity(dto);
 
-        if (file != null && !file.isEmpty()) {
+        moderator.setRole(Role.MODERATOR);
+        moderator.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        if (file != null && !file.isEmpty()){
+
             FileUploadResult result = storage.storeFile(file);
             String publicUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path(result.url()).toUriString();
+
             moderator.setImageUrl(publicUrl);
         }
 
-        return moderatorMapper.toDTO(moderatorRepo.save(moderator));
+        Moderator saved = moderatorRepo.save(moderator);
+
+        return moderatorMapper.toDTO(saved);
     }
 
     @Override
@@ -73,52 +82,53 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ModeratorDTO updateModerator(Long moderatorId, Moderator moderator, MultipartFile file){
-        Moderator existing = moderatorRepo.findById(moderatorId)
-            .orElseThrow(() -> new RuntimeException("Moderator not found"));
+    public ModeratorUpdateDTO updateModerator(Long moderatorId, ModeratorUpdateDTO dto, MultipartFile file){
 
-    
-        Optional<Moderator> byEmail = moderatorRepo.findByEmail(moderator.getEmail());
-        if (byEmail.isPresent() && !byEmail.get().getId().equals(moderatorId)) {
+        Moderator existing = moderatorRepo.findById(moderatorId).orElseThrow(() -> new RuntimeException("Moderator not found"));
+
+        Optional<Moderator> byEmail = moderatorRepo.findByEmail(dto.getEmail());
+
+        if (byEmail.isPresent() && !byEmail.get().getId().equals(moderatorId)){
             throw new UniqueConstraintViolationException("Email is already in use");
         }
-    
-        Optional<Moderator> byPhone = moderatorRepo.findByPhone(moderator.getPhone());
+
+        Optional<Moderator> byPhone = moderatorRepo.findByPhone(dto.getPhone());
+
         if (byPhone.isPresent() && !byPhone.get().getId().equals(moderatorId)){
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
-        existing.setFirstName(moderator.getFirstName());
-        existing.setLastName(moderator.getLastName());
-        existing.setEmail(moderator.getEmail());
-        existing.setPhone(moderator.getPhone());
 
-        if (file != null && !file.isEmpty()) {
+        moderatorMapper.updateEntity(dto, existing);
+
+        if (file != null && !file.isEmpty()){
+
             FileUploadResult result = storage.storeFile(file);
+
             String publicUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path(result.url()).toUriString();
-            moderator.setImageUrl(publicUrl);
-        }
-        if (moderator.getImageUrl() != null) {
-            existing.setImageUrl(moderator.getImageUrl());
+
+            existing.setImageUrl(publicUrl);
         }
 
-        return moderatorMapper.toDTO(moderatorRepo.save(existing));
+        Moderator saved = moderatorRepo.save(existing);
+
+        return moderatorMapper.toDTO(saved);
+
     }
 
     @Override
-    public Page<ModeratorDTO> listAllModerators(Pageable pageable){
+    public Page<ModeratorUpdateDTO> listAllModerators(Pageable pageable){
         return moderatorRepo.findAll(pageable).map(moderatorMapper::toDTO);
     }
 
     @Override
-    public ModeratorDTO getModeratorById(Long id){
-        return moderatorMapper.toDTO(moderatorRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Moderator not found with id: " + id)));
+    public ModeratorUpdateDTO getModeratorById(Long id){
+        return moderatorMapper.toDTO(moderatorRepo.findById(id).orElseThrow(() -> new RuntimeException("Moderator not found with id: " + id)));
     }
 
     @Override
-    public boolean updatePassword(PasswordChangeRequest request){
+    public boolean updatePasswordModerator(Long authenticatedUserId,PasswordChangeRequestDTO request){
 
-        Optional<Moderator> optionalModerator = moderatorRepo.findById(request.getId());
+        Optional<Moderator> optionalModerator = moderatorRepo.findById(authenticatedUserId);
         if (optionalModerator.isEmpty()) {
             return false;
         }
@@ -136,9 +146,9 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public boolean updatePasswordManager(PasswordChangeRequest request){
+    public boolean updatePasswordManager(Long authenticatedUserId,PasswordChangeRequestDTO request){
 
-        Optional<Manager> optionalManager = managerRepo.findById(request.getId());
+        Optional<Manager> optionalManager = managerRepo.findById(authenticatedUserId);
         if (optionalManager.isEmpty()) {
             return false;
         }
@@ -156,27 +166,32 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ManagerDTO hireManager(Manager manager, MultipartFile file){
+    public ManagerUpdateDTO hireManager(ManagerCreateDTO dto, MultipartFile file){
 
-        Optional<Manager> byEmail = managerRepo.findByEmail(manager.getEmail());
-        if (byEmail.isPresent()) {
+        if (managerRepo.findByEmail(dto.getEmail()).isPresent()){
             throw new UniqueConstraintViolationException("Email is already in use");
         }
-    
-        Optional<Manager> byPhone = managerRepo.findByPhone(manager.getPhone());
-        if (byPhone.isPresent()) {
+
+        if (managerRepo.findByPhone(dto.getPhone()).isPresent()){
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
 
-        manager.setPassword(passwordEncoder.encode(manager.getPassword()));
+        Manager manager = managerMapper.toEntity(dto);
 
-        if (file != null && !file.isEmpty()) {
+        manager.setRole(Role.MANAGER);
+        manager.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        if (file != null && !file.isEmpty()){
+
             FileUploadResult result = storage.storeFile(file);
             String publicUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path(result.url()).toUriString();
+
             manager.setImageUrl(publicUrl);
         }
 
-        return managerMapper.toDTO(managerRepo.save(manager));
+        Manager saved = managerRepo.save(manager);
+
+        return managerMapper.toDTO(saved);
     }
 
     @Override
@@ -185,44 +200,45 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ManagerDTO updateManager(Long managerId, Manager manager, MultipartFile file){
+    public ManagerUpdateDTO updateManager(Long managerId, ManagerUpdateDTO dto, MultipartFile file){
 
-        Manager existing = managerRepo.findById(managerId).orElseThrow(() -> new RuntimeException("Manager not found"));
+        Manager existing = managerRepo.findById(managerId).orElseThrow(() -> new RuntimeException("Moderator not found"));
 
-        Optional<Manager> byEmail = managerRepo.findByEmail(manager.getEmail());
-        if (byEmail.isPresent() && !byEmail.get().getId().equals(managerId)) {
+        Optional<Manager> byEmail = managerRepo.findByEmail(dto.getEmail());
+
+        if (byEmail.isPresent() && !byEmail.get().getId().equals(managerId)){
             throw new UniqueConstraintViolationException("Email is already in use");
         }
-    
-        Optional<Manager> byPhone = managerRepo.findByPhone(manager.getPhone());
-        if (byPhone.isPresent() && !byPhone.get().getId().equals(managerId)) {
+
+        Optional<Manager> byPhone = managerRepo.findByPhone(dto.getPhone());
+
+        if (byPhone.isPresent() && !byPhone.get().getId().equals(managerId)){
             throw new UniqueConstraintViolationException("Phone number is already in use");
         }
 
-        existing.setFirstName(manager.getFirstName());
-        existing.setLastName(manager.getLastName());
-        existing.setEmail(manager.getEmail());
-        existing.setPhone(manager.getPhone());
-        existing.setRole(manager.getRole());
-        if (file != null && !file.isEmpty()) {
+        managerMapper.updateEntity(dto, existing);
+
+        if (file != null && !file.isEmpty()){
+
             FileUploadResult result = storage.storeFile(file);
+
             String publicUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path(result.url()).toUriString();
-            manager.setImageUrl(publicUrl);
-        }
-        if (manager.getImageUrl() != null) {
-            existing.setImageUrl(manager.getImageUrl());
+
+            existing.setImageUrl(publicUrl);
         }
 
-        return managerMapper.toDTO(managerRepo.save(existing));
+        Manager saved = managerRepo.save(existing);
+
+        return managerMapper.toDTO(saved);
     }
 
     @Override
-    public Page<ManagerDTO> listAllManagers(Pageable pageable){
+    public Page<ManagerUpdateDTO> listAllManagers(Pageable pageable){
         return managerRepo.findAll(pageable).map(managerMapper::toDTO);
     }
 
     @Override
-    public ManagerDTO getManagerById(Long id){
+    public ManagerUpdateDTO getManagerById(Long id){
         return managerMapper.toDTO(managerRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Manager not found with id: " + id)));
     }
@@ -233,14 +249,20 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public UserAdminDTO updateUserInfo(Long userId, User user){
+    @Transactional
+    public UserAdminDTO updateUserInfo(Long userId, UserAdminDTO dto){
 
-        User existing = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        existing.setFirstName(user.getFirstName());
-        existing.setLastName(user.getLastName());
-        existing.setLocation(user.getLocation());
-        existing.setShorterBio(user.getShorterBio());
-        return userMapper.toAdminDTO(userRepo.save(existing));
+        User existingUser = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        existingUser.setApproved(dto.isApproved());
+        existingUser.setBanned(dto.isBanned());
+        existingUser.setConfirmed(dto.isConfirmed());
+        existingUser.setPersonalityScore(dto.getPersonalityScore());
+        existingUser.setRole(dto.getRole());
+
+        User saved = userRepo.save(existingUser);
+        return userMapper.toAdminDTO(saved);
 
     }
+
 }

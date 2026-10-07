@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -17,14 +18,14 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
     @Value("${app.frontend-url}")
-    private final String frontendUrl;
+    private String frontendUrl;
 
     @Override
     public void sendTokenEmail(String to, String token, Token.TokenType type) {
 
-        String link = frontendUrl + token; 
+        String resetLink = UriComponentsBuilder.fromUriString(frontendUrl).path("/reset-password").queryParam("token", token).build().encode().toUriString(); 
 
-        String body = "Click on this link to complete the process:\n\n" + link;
+        String body = "Click on this link to complete the process:\n\n" + resetLink;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -39,7 +40,7 @@ public class EmailServiceImpl implements EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Your OTP Code");
-        message.setText("Your verification code is: " + otp + "\nThis code will expire in 5 minutes.");
+        message.setText("Your verification code is: " + otp + "\nThis code will expire in 10 minutes.");
         mailSender.send(message);
     }
 }

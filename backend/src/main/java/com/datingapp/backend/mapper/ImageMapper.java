@@ -16,7 +16,9 @@ public class ImageMapper {
         UserImage image = new UserImage();
 
         image.setId(dto.getId());
+        image.setUser(null);
         image.setImageUrl(dto.getImageUrl());
+        image.setModerationStatus(dto.getModerationStatus());
 
         return image;
     }

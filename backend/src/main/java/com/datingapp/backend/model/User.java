@@ -2,8 +2,9 @@ package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
@@ -19,10 +20,12 @@ import com.datingapp.backend.enums.Gender;
 import com.datingapp.backend.enums.RelationshipType;
 import com.datingapp.backend.enums.Role;
 import com.datingapp.backend.enums.Smoking;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -39,6 +42,7 @@ public class User {
     private String email;
     
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     //Personal Information

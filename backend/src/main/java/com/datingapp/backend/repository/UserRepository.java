@@ -9,6 +9,7 @@ import com.datingapp.backend.projection.NearbyUserProjection;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @EntityGraph(attributePaths = "images")
     @Query("SELECT u FROM User u WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<User> searchByFullName(@Param("name") String name, Pageable page);
 
@@ -33,8 +35,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
+    @EntityGraph(attributePaths = "images")
     Page<User> findByApprovedFalse(Pageable pageable);
 
+    @EntityGraph(attributePaths = "images")
     Page<User> findByApprovedTrueAndBannedFalse(Pageable pageable);
 
     @Query("SELECT COUNT(u) FROM User u")
@@ -56,7 +60,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         SELECT
             u.id AS id,
             u.username AS username,
-            u.full_name AS fullName,
+            u.first_name AS firstName,
+            u.last_name AS lastName,
             u.birth_date AS birthDate,
             u.gender AS gender,
             u.body_type AS bodyType,

@@ -20,6 +20,7 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final String password;
     private final Role role;
+    private final boolean banned;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -27,25 +28,24 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
+    public String getUsername(){
         return email;
     }
 
-    // Aşağıdaki metotları basitçe true dönecek şekilde implemente ediyoruz.
     @Override
-    public boolean isAccountNonExpired() {
+    public boolean isAccountNonExpired(){
+        return true;
+    }
+    @Override
+    public boolean isCredentialsNonExpired(){
+        return true;
+    }
+    @Override
+    public boolean isEnabled(){
         return true;
     }
     @Override
     public boolean isAccountNonLocked() {
-        return true;
-    }
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-    @Override
-    public boolean isEnabled() {
-        return true;
+        return !banned;
     }
 }

@@ -45,4 +45,5 @@ public class UserProfileDTO {
     private String weekendPlans;
 
     private List<ImageDTO> images;
+
 }

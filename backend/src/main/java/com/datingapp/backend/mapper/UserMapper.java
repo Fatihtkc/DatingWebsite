@@ -1,7 +1,7 @@
 package com.datingapp.backend.mapper;
 
-import com.datingapp.backend.dto.UserAdminDTO;
 import com.datingapp.backend.dto.User.NearbyUserDTO;
+import com.datingapp.backend.dto.User.UserAdminDTO;
 import com.datingapp.backend.dto.User.UserCreateDTO;
 import com.datingapp.backend.dto.User.UserProfileDTO;
 import com.datingapp.backend.dto.User.UserUpdateDTO;
@@ -25,7 +25,7 @@ public class UserMapper {
 
     private final ImageMapper userImageMapper;
 
-    public UserProfileDTO toDTO(User user) {
+    public UserProfileDTO toDTO(User user){
 
         UserProfileDTO dto = new UserProfileDTO();
 
@@ -48,18 +48,13 @@ public class UserMapper {
         dto.setFavoriteMusic(user.getFavoriteMusic());
         dto.setWeekendPlans(user.getWeekendPlans());
         if (user.getImages() != null) {
-            dto.setImages(
-                user.getImages()
-                    .stream()
-                    .filter(img -> img.getModerationStatus() == ModerationStatus.APPROVED)
-                    .map(userImageMapper::toDTO)
-                    .toList()
-            );
+            dto.setImages(user.getImages().stream().filter(img -> img.getModerationStatus() == ModerationStatus.APPROVED)
+                    .map(userImageMapper::toDTO).toList());
         }
         return dto;
     }
 
-    public UserCreateDTO toCreateDTO(User user) {
+    public UserCreateDTO toCreateDTO(User user){
 
         UserCreateDTO dto = new UserCreateDTO();
 
@@ -88,7 +83,7 @@ public class UserMapper {
         return dto;
     }
 
-    public UserUpdateDTO toUpdateDTO(User user) {
+    public UserUpdateDTO toUpdateDTO(User user){
 
         UserUpdateDTO dto = new UserUpdateDTO();
 
@@ -114,7 +109,7 @@ public class UserMapper {
         return dto;
     }
 
-    public NearbyUserDTO toNearbyDTO(NearbyUserProjection projection) {
+    public NearbyUserDTO toNearbyDTO(NearbyUserProjection projection){
 
         NearbyUserDTO dto = new NearbyUserDTO();
 
@@ -124,43 +119,17 @@ public class UserMapper {
         dto.setLastName(projection.getLastName());
         dto.setBirthDate(projection.getBirthDate());
 
-        dto.setGender(
-            projection.getGender() != null
-                ? Gender.valueOf(projection.getGender())
-                : null
-        );
+        dto.setGender(projection.getGender() != null ? Gender.valueOf(projection.getGender()) : null);
 
-        dto.setBodyType(
-            projection.getBodyType() != null
-                ? BodyType.valueOf(projection.getBodyType())
-                : null
-        );
+        dto.setBodyType(projection.getBodyType() != null ? BodyType.valueOf(projection.getBodyType()) : null);
 
-        dto.setRelationshipType(
-            projection.getRelationshipType() != null
-                ? RelationshipType.valueOf(
-                    projection.getRelationshipType()
-                )
-                : null
-        );
+        dto.setRelationshipType(projection.getRelationshipType() != null ? RelationshipType.valueOf(projection.getRelationshipType()) : null);
 
-        dto.setSmoke(
-            projection.getSmoke() != null
-                ? Smoking.valueOf(projection.getSmoke())
-                : null
-        );
+        dto.setSmoke(projection.getSmoke() != null ? Smoking.valueOf(projection.getSmoke()) : null);
 
-        dto.setAlcohol(
-            projection.getAlcohol() != null
-                ? Alcohol.valueOf(projection.getAlcohol())
-                : null
-        );
+        dto.setAlcohol(projection.getAlcohol() != null ? Alcohol.valueOf(projection.getAlcohol()): null);
 
-        dto.setDiet(
-            projection.getDiet() != null
-                ? Diet.valueOf(projection.getDiet())
-                : null
-        );
+        dto.setDiet(projection.getDiet() != null ? Diet.valueOf(projection.getDiet()): null);
 
         dto.setShorterBio(projection.getShorterBio());
 
@@ -169,7 +138,8 @@ public class UserMapper {
         return dto;
     }
 
-    public UserAdminDTO toAdminDTO(User user) {
+    public UserAdminDTO toAdminDTO(User user){
+
         UserAdminDTO dto = new UserAdminDTO();
 
         dto.setId(user.getId());
@@ -182,19 +152,13 @@ public class UserMapper {
         dto.setConfirmed(user.isConfirmed());
         dto.setPersonalityScore(user.getPersonalityScore());
         dto.setRole(user.getRole());
-        dto.setImages(
-            user.getImages() != null
-                ? user.getImages()
-                    .stream()
-                    .map(userImageMapper::toDTO)
-                    .toList()
-                : null
-        );
+        dto.setImages(user.getImages() != null ? user.getImages().stream().map(userImageMapper::toDTO).toList() : null);
 
         return dto;
     }
 
-    public User toEntity(UserProfileDTO dto) {
+    public User toEntity(UserProfileDTO dto){
+
         User user = new User();
 
         user.setId(dto.getId());
@@ -244,7 +208,8 @@ public class UserMapper {
         return user;
     }
 
-    public User toEntity(UserCreateDTO dto) {
+    public User toEntity(UserCreateDTO dto){
+
         User user = new User();
 
         user.setUsername(dto.getUsername());
@@ -272,7 +237,8 @@ public class UserMapper {
         return user;
     }
 
-    public User toEntity(UserAdminDTO dto) {
+    public User toEntity(UserAdminDTO dto){
+
         User user = new User();
 
         user.setId(dto.getId());
@@ -285,15 +251,7 @@ public class UserMapper {
         user.setConfirmed(dto.isConfirmed());
         user.setPersonalityScore(dto.getPersonalityScore());
         user.setRole(dto.getRole());
-        user.setImages(
-            dto.getImages() != null
-                ? dto.getImages()
-                    .stream()
-                    .map(userImageMapper::toUserImageEntity)
-                    .toList()
-                : null
-        );
-
+        user.setImages(dto.getImages() != null ? dto.getImages().stream().map(userImageMapper::toUserImageEntity).toList() : null);
 
         return user;
     }

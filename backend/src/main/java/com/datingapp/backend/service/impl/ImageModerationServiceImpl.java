@@ -30,9 +30,7 @@ public class ImageModerationServiceImpl implements ImageModerationService {
     private final RekognitionClient rekognitionClient;
 
     public ImageModerationServiceImpl(@Value("${aws.rekognition.region}") String region){
-        this.rekognitionClient = RekognitionClient.builder()
-            .region(Region.of(region))
-            .build();
+        this.rekognitionClient = RekognitionClient.builder().region(Region.of(region)).build();
     }
 
     @Override
@@ -40,13 +38,10 @@ public class ImageModerationServiceImpl implements ImageModerationService {
 
         try {
             Image image = Image.builder()
-                .bytes(SdkBytes.fromByteArray(imageBytes))
-                .build();
+                .bytes(SdkBytes.fromByteArray(imageBytes)).build();
 
             DetectModerationLabelsRequest request = DetectModerationLabelsRequest.builder()
-                .image(image)
-                .minConfidence(MIN_CONFIDENCE)
-                .build();
+                .image(image).minConfidence(MIN_CONFIDENCE).build();
 
             DetectModerationLabelsResponse response = rekognitionClient.detectModerationLabels(request);
 

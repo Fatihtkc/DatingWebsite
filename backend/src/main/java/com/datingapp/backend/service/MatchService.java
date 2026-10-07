@@ -11,6 +11,5 @@ public interface MatchService {
     Page<MatchDTO> getMatchesForUser(Long userId, Pageable pageable);
     boolean isMatched(Long userId1, Long userId2);
     Match createMatch(Long userId1, Long userId2);
-    void deleteMatch(Long matchId);
-    
+    void deleteMatch(Long matchId, Long userId);    
 }

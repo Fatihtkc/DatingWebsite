@@ -1,16 +1,20 @@
 package com.datingapp.backend.service.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.model.Token;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.repository.TokenRepository;
 import com.datingapp.backend.repository.UserRepository;
+import com.datingapp.backend.service.RefreshTokenService;
 import com.datingapp.backend.service.TokenService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,14 +26,17 @@ public class TokenServiceImpl implements TokenService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
+
 
     @Override
+    @Transactional
     public void createToken(User user, String token, Token.TokenType type, Duration validity) {
 
         LocalDateTime expiryDate = LocalDateTime.now().plus(validity);
 
         Token t = new Token();
-        t.setToken(token);
+        t.setHashToken(hash(token));
         t.setUser(user);
         t.setType(type);
         t.setExpiryDate(expiryDate);
@@ -37,34 +44,48 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User validateToken(String token, Token.TokenType type) {
+
+        String tokenHash = hash(token);
 
         LocalDateTime now = LocalDateTime.now();
 
-        return tokenRepository.findByTokenAndType(token, type)
-            .filter(t -> t.getExpiryDate().isAfter(now))
+        return tokenRepository.findByTokenHashAndType(tokenHash, type)
+            .filter(t -> t.getExpiryDate()
+            .isAfter(now))
             .map(t -> t.getUser())
             .orElseThrow(() -> new IllegalArgumentException("The token is invalid or has expired."));
     }
 
     @Override
-    public void invalidateToken(String token) {
-        tokenRepository.deleteById(token);
+    @Transactional 
+    public void invalidateToken(String hashToken){
+        tokenRepository.deleteById(hashToken);
     }
 
     @Override
-    public void resetPassword(String token, String newPassword) {
+    @Transactional 
+    public void resetPassword(String token, String newPassword){
         User user = validateToken(token, Token.TokenType.PASSWORD_RESET);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        invalidateToken(token);
+        refreshTokenService.revokeAll(user.getEmail());
+        invalidateToken(hash(token));
     }
 
     @Override
-    public void createPasswordResetToken(String email, String token, Duration duration) {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UserNotFoundException("User not found"));
-        createToken(user, token, Token.TokenType.PASSWORD_RESET, duration);
+    public void createPasswordResetToken(String email, String token, Duration duration){
+        userRepository.findByEmail(email).ifPresent(user -> createToken(user, token, Token.TokenType.PASSWORD_RESET, duration));
+    }
+
+    private String hash(String raw){
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(md.digest(raw.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
     
 }

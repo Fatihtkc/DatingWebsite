@@ -4,8 +4,8 @@ import com.datingapp.backend.enums.ModerationStatus;
 import com.datingapp.backend.service.FileStorageService;
 import com.datingapp.backend.service.FileUploadResult;
 import com.datingapp.backend.service.ImageModerationService;
-import com.datingapp.backend.service.records.BatchUploadResult;
 import com.datingapp.backend.exception.ContentPolicyViolationException;
+import com.datingapp.backend.records.BatchUploadResult;
 
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -30,7 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -38,9 +37,17 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStorageServiceImpl.class);
 
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg", "image/png");
-
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+    private static final int MAX_FILES_PER_REQUEST = 10;
+
+    private static final long MAX_BATCH_SIZE = 25 * 1024 * 1024;
+
+    private static final int MAX_WIDTH = 8000;
+
+    private static final int MAX_HEIGHT = 8000;
+
+    private static final long MAX_PIXELS = 20_000_000L;
 
     private static final int MAX_DIMENSION = 1600;
 
@@ -72,22 +79,34 @@ public class FileStorageServiceImpl implements FileStorageService {
 
         BufferedImage image;
         byte[] originalBytes;
+        String imageFormat;
 
         try {
             originalBytes = file.getBytes();
+
+            imageFormat = detectImageFormat(originalBytes);
+
+            if (!"jpeg".equals(imageFormat) && !"png".equals(imageFormat)){
+                throw new IllegalArgumentException( "Only JPG and PNG images are supported.");
+            }
+
             image = ImageIO.read(new ByteArrayInputStream(originalBytes));
-        } catch (IOException ex) {
+
+            if (image == null){
+                throw new IllegalArgumentException("The uploaded file is not a valid image.");
+            }
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            long pixels = (long) width * height;
+
+            if (width > MAX_WIDTH || height > MAX_HEIGHT || pixels > MAX_PIXELS){
+
+                throw new IllegalArgumentException("The image dimensions are too large.");
+            }
+                } catch (IOException ex){
             throw new IllegalArgumentException("The file could not be read.", ex);
-        }
-
-        if (image == null) {
-            throw new IllegalArgumentException("The uploaded file is not a valid or supported image.");
-        }
-
-        String contentType = file.getContentType();
-
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())){
-            throw new IllegalArgumentException("Only JPG and PNG images are supported.");
         }
 
         ModerationStatus moderationStatus = imageModerationService.moderate(originalBytes);
@@ -96,8 +115,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new ContentPolicyViolationException("The uploaded image violates our content policy.");
         }
 
-        String outputExtension =contentType.equalsIgnoreCase("image/png") ? "png" : "jpg";
-
+        String outputExtension = imageFormat.equals("png") ? "png" : "jpg";
         String generatedFilename = UUID.randomUUID() + "." + outputExtension;
 
         Path targetLocation = fileStorageLocation.resolve(generatedFilename).normalize();
@@ -118,7 +136,26 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public BatchUploadResult storeFiles(List<MultipartFile> files) {
+    public BatchUploadResult storeFiles(List<MultipartFile> files){
+        
+        if (files == null || files.isEmpty()){
+            throw new IllegalArgumentException("At least one file is required.");
+        }
+
+        if (files.size() > MAX_FILES_PER_REQUEST){
+            throw new IllegalArgumentException("You can upload at most 10 files at once.");
+        }
+
+        long totalSize = 0;
+
+        for (MultipartFile file : files){
+            totalSize += file.getSize();
+
+            if (totalSize > MAX_BATCH_SIZE){
+                throw new IllegalArgumentException("The total upload size cannot exceed 25 MB.");
+            }
+        }
+
         List<FileUploadResult> accepted = new ArrayList<>();
         List<BatchUploadResult.RejectedFile> rejected = new ArrayList<>();
 
@@ -189,6 +226,32 @@ public class FileStorageServiceImpl implements FileStorageService {
             logger.error("Error while deleting file: {}", fileUrl, ex);
 
             return false;
+        }
+    }
+
+    private String detectImageFormat(byte[] bytes) throws IOException {
+
+        try (
+            ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+            javax.imageio.stream.ImageInputStream imageInput = ImageIO.createImageInputStream(input)
+        ) {
+            if (imageInput == null){
+                return null;
+            }
+
+            var readers = ImageIO.getImageReaders(imageInput);
+
+            if (!readers.hasNext()){
+                return null;
+            }
+
+            var reader = readers.next();
+
+            try {
+                return reader.getFormatName().toLowerCase();
+            } finally {
+                reader.dispose();
+            }
         }
     }
 }

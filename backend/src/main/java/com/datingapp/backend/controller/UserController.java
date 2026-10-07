@@ -1,17 +1,18 @@
 package com.datingapp.backend.controller;
 
+import com.datingapp.backend.dto.JwtResponseDTO;
 import com.datingapp.backend.dto.User.NearbyUserDTO;
 import com.datingapp.backend.dto.User.UserCreateDTO;
 import com.datingapp.backend.dto.User.UserProfileDTO;
 import com.datingapp.backend.dto.User.UserUpdateDTO;
-import com.datingapp.backend.enums.Role;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.security.CustomUserDetails;
-import com.datingapp.backend.security.JwtUtil;
 import com.datingapp.backend.service.LoginService;
 import com.datingapp.backend.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
@@ -25,17 +26,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final LoginService loginService;
-    private final JwtUtil jwtUtil;
 
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
@@ -47,29 +44,28 @@ public class UserController {
 
     }
 
-    @GetMapping("/profiles")
+    @GetMapping("/allprofiles")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<UserProfileDTO>> getAllUsers(@PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(userService.getAllUsers(pageable));
-
     }
 
-    @GetMapping("/users/active") 
+    @GetMapping("/profiles") 
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Page<UserProfileDTO>> getAll(@PageableDefault(page = 0, size = 20) Pageable pageable){
+    public ResponseEntity<Page<UserProfileDTO>> getAllActiveUsers(@PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(userService.getAllActiveUsers(pageable));
 
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileDTO> getById(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long id){
         return ResponseEntity.ok(userService.getUserById(id, principal.getId()));
     }
 
-    @GetMapping("/profile/{email}")
+    @GetMapping("/{email}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileDTO> getByEmail(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable String email){
 
@@ -94,13 +90,9 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<JwtResponse> createUser(@RequestBody @Valid UserCreateDTO dto){
-        User createdUser = userService.createUser(dto);
-
-        CustomUserDetails userDetails = new CustomUserDetails(createdUser.getId(), createdUser.getUsername(), createdUser.getPassword(), createdUser.getRole());
-        String jwt = jwtUtil.generateJwtToken(userDetails);
-
-        return ResponseEntity.ok(new JwtResponse(jwt, createdUser.getRole()));
+    public ResponseEntity<JwtResponseDTO> createUser(@RequestBody @Valid UserCreateDTO dto){
+        
+        return ResponseEntity.ok(userService.createUser(dto));
     }
 
     @PutMapping("/profile/{id}")
@@ -109,7 +101,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("#id == principal.id or hasRole('MODERATOR')")
     public ResponseEntity<Void> delete(@PathVariable Long id){
 
@@ -121,33 +113,15 @@ public class UserController {
     
     @GetMapping("/nearby")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Page<NearbyUserDTO>> getNearbyUsers(@AuthenticationPrincipal CustomUserDetails principal, @RequestParam double lat,
-            @RequestParam double lon, @RequestParam(defaultValue = "50") double distanceKm, @PageableDefault(page = 0, size = 20) Pageable pageable){
+    public ResponseEntity<Page<NearbyUserDTO>> getNearbyUsers(
+        @AuthenticationPrincipal CustomUserDetails principal, 
+        @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") double lat,
+        @RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") double lon,
+        @RequestParam(defaultValue = "50") @DecimalMin("0.1") @DecimalMax("100") double distanceKm,
+        @PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(userService.getNearbyUsers(principal.getId(), lat, lon, distanceKm, pageable));
 
     }
 
-    class JwtResponse {
-
-        private String token;
-        private Role role;
-
-        public JwtResponse(String token, Role role) {
-            this.token = token;
-            this.role = role;
-        }
-        public String getToken() {
-            return token;
-        }
-        public void setToken(String token) {
-            this.token = token;
-        }
-        public Role getRole() {
-            return role;
-        }
-        public void setRole(Role role) {
-            this.role = role;
-        }
-    }
 }

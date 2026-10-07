@@ -9,8 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.datingapp.backend.dto.NotificationDTO;
-import com.datingapp.backend.dto.NotificationSettingsDTO;
+import com.datingapp.backend.dto.Notification.NotificationDTO;
+import com.datingapp.backend.dto.Notification.NotificationSettingsDTO;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.NotificationService;
 

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/likes")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class LikeController {
 
@@ -45,9 +44,9 @@ public class LikeController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails principal){
 
-        likeService.removeLike(id);
+        likeService.removeLike(id, principal.getId());
 
         return ResponseEntity.noContent().build();
     }

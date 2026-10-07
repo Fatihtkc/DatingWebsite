@@ -18,7 +18,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class UserImageController {
 
@@ -41,6 +40,7 @@ public class UserImageController {
     public ResponseEntity<UploadedImagesResponseDTO> replaceUserImages(@AuthenticationPrincipal CustomUserDetails principal, @RequestPart("images") List<MultipartFile> files){
 
         UploadedImagesResponseDTO response = userImageService.replaceUserImages(principal.getId(), files);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

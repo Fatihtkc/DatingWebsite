@@ -1,20 +1,21 @@
 package com.datingapp.backend.service.impl;
 
-import com.datingapp.backend.dto.NotificationDTO;
-import com.datingapp.backend.dto.NotificationSettingsDTO;
+import com.datingapp.backend.dto.Notification.NotificationDTO;
+import com.datingapp.backend.dto.Notification.NotificationSettingsDTO;
 import com.datingapp.backend.enums.NotificationType;
 import com.datingapp.backend.mapper.NotificationMapper;
 import com.datingapp.backend.model.Notification;
 import com.datingapp.backend.model.NotificationSettings;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.records.NotificationPushEvent;
 import com.datingapp.backend.repository.NotificationRepository;
 import com.datingapp.backend.repository.NotificationSettingsRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.NotificationService;
-import com.datingapp.backend.service.PushNotificationService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,12 +31,11 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationSettingsRepository settingsRepository;
     private final UserRepository userRepository;
-    private final PushNotificationService pushService;
     private final NotificationMapper notificationMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    @Transactional
-    public void notify(User recipient, NotificationType type, Long relatedEntityId, String title, String body, boolean sendPush) {
+    public void notify(User recipient, NotificationType type, Long relatedEntityId, String title, String body, boolean sendPush){
 
         Optional<NotificationSettings> settingsOpt = settingsRepository.findByUserId(recipient.getId());
 
@@ -53,30 +53,28 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setCreatedAt(LocalDateTime.now());
         notificationRepository.save(notification);
 
-        if (sendPush) {
-            settingsOpt.ifPresent(settings ->
-                pushService.send(settings.getFcmToken(), title, body,
-                    relatedEntityId != null ? relatedEntityId.toString() : null)
+        if (sendPush){
+            eventPublisher.publishEvent(
+                new NotificationPushEvent(
+                        recipient.getId(),
+                        settingsOpt.map(NotificationSettings::getFcmToken).orElse(null),
+                        title,
+                        body,
+                        relatedEntityId != null ? relatedEntityId.toString() : null
+                )
             );
         }
     }
 
-        @Override
-    public void updateFcmToken(Long userId, String token) {
+    @Override
+    @Transactional
+    public void updateFcmToken(Long userId, String token){
 
-        NotificationSettings settings =
-                settingsRepository.findByUserId(userId)
-                        .orElseGet(() -> {
-
-                            NotificationSettings newSettings =
-                                    new NotificationSettings();
-
-                            newSettings.setUser(
-                                    userRepository.getReferenceById(userId)
-                            );
-
-                            return newSettings;
-                        });
+        NotificationSettings settings = settingsRepository.findByUserId(userId).orElseGet(() -> {
+            NotificationSettings newSettings = new NotificationSettings();
+            newSettings.setUser(userRepository.getReferenceById(userId));
+            return newSettings;
+        });
 
         settings.setFcmToken(token);
 
@@ -87,12 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public Page<NotificationDTO> getNotifications(Long userId, Pageable pageable){
 
-        Page<Notification> notifications =
-                notificationRepository
-                        .findByRecipientIdOrderByCreatedAtDesc(
-                                userId,
-                                pageable
-                        );
+        Page<Notification> notifications = notificationRepository.findByRecipientIdOrderByCreatedAtDesc(userId, pageable);
 
         return notifications.map(notificationMapper::toDTO);
     }
@@ -101,8 +94,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public long getUnreadCount(Long userId){
 
-        return notificationRepository
-                .countByRecipientIdAndIsReadFalse(userId);
+        return notificationRepository.countByRecipientIdAndIsReadFalse(userId);
     }
 
     @Override
@@ -123,6 +115,16 @@ public class NotificationServiceImpl implements NotificationService {
         settings.setLikeNotificationsEnabled(dto.isLikeNotificationsEnabled());
 
         settingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public void clearFcmToken(Long userId){
+        settingsRepository.findByUserId(userId)
+            .ifPresent(settings -> {settings
+                .setFcmToken(null); 
+                settingsRepository.save(settings);
+            });
     }
 
     private boolean isEnabled(NotificationSettings settings, NotificationType type) {

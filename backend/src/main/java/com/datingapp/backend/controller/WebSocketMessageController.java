@@ -11,6 +11,7 @@ import com.datingapp.backend.dto.Message.GetMessageDTO;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.MessageService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -21,7 +22,7 @@ public class WebSocketMessageController {
     private final MessageService messageService;
 
     @MessageMapping("/sendMessage")
-    public void receiveMessage(@Payload SendMessageDTO message, @AuthenticationPrincipal CustomUserDetails principal) {
+    public void receiveMessage(@Payload @Valid SendMessageDTO message, @AuthenticationPrincipal CustomUserDetails principal){
         
         GetMessageDTO saved = messageService.saveMessage(principal, message);
 

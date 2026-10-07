@@ -1,16 +1,24 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_blocks",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"blocker_id", "blocked_id"})},
-    indexes = {@Index(name = "idx_blocked_id", columnList = "blocked_id")})
-@Data
+@Table(
+    name = "user_blocks",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_user_block", columnNames = {"blocker_id", "blocked_id"})
+    },
+    indexes = {
+        @Index(name = "idx_blocked_id", columnList = "blocked_id")
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBlock {

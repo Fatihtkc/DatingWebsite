@@ -2,6 +2,7 @@ package com.datingapp.backend.service.impl;
 
 import com.datingapp.backend.dto.Like.UserLikeDTO;
 import com.datingapp.backend.enums.NotificationType;
+import com.datingapp.backend.exception.ConflictException;
 import com.datingapp.backend.mapper.UserLikeMapper;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.model.UserLike;
@@ -11,15 +12,15 @@ import com.datingapp.backend.service.LikeService;
 import com.datingapp.backend.service.NotificationService;
 import com.datingapp.backend.service.UserBlockService;
 
-
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,8 @@ public class LikeServiceImpl implements LikeService {
                 .map(userLikeMapper::toDTO);
     }
 
+    @Override
+    @Transactional 
     public UserLike addLike(Long likerId, Long likedId){
 
         if (userBlockService.isBlockedBetween(likerId, likedId)) {
@@ -57,19 +60,26 @@ public class LikeServiceImpl implements LikeService {
         like.setLiked(liked);
         like.setLikedAt(LocalDateTime.now());
 
-        UserLike savedLike = likeRepository.save(like);
+        try {
+            UserLike savedLike = likeRepository.save(like);
 
-        notificationService.notify(liked, NotificationType.NEW_LIKE, savedLike.getId(), "New Like! 💕", "Someone likes you!", true);
-        
-        return savedLike;
+            notificationService.notify(liked, NotificationType.NEW_LIKE, savedLike.getId(), "New Like! 💕", "Someone likes you!", true);
+         
+            return savedLike;
+
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("User already liked");
+        }
+
+
     }
 
     @Override
-    public void removeLike(Long likeId){
+    @Transactional 
+    public void removeLike(Long likeId, Long likerId){
 
-        if (!likeRepository.existsById(likeId)) {
-            throw new RuntimeException("Like not found with id: " + likeId);
-        }
-        likeRepository.deleteById(likeId);
+        UserLike like = likeRepository.findByIdAndLikerId(likeId, likerId).orElseThrow(() -> new AccessDeniedException("You cannot delete this like."));
+
+        likeRepository.delete(like);
     }
 }

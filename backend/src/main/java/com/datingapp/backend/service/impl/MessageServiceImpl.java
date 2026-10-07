@@ -3,6 +3,7 @@ package com.datingapp.backend.service.impl;
 import com.datingapp.backend.dto.Message.GetMessageDTO;
 import com.datingapp.backend.dto.Message.SendMessageDTO;
 import com.datingapp.backend.enums.NotificationType;
+import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.mapper.MessageMapper;
 import com.datingapp.backend.model.Conversation;
 import com.datingapp.backend.model.Message;
@@ -15,6 +16,9 @@ import com.datingapp.backend.service.ConversationService;
 import com.datingapp.backend.service.MatchService;
 import com.datingapp.backend.service.UserBlockService;
 import com.datingapp.backend.websocket.WebSocketPresenceRegistry;
+
+import jakarta.transaction.Transactional;
+
 import com.datingapp.backend.service.MessageService;
 import com.datingapp.backend.service.NotificationService;
 
@@ -26,7 +30,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,29 +46,29 @@ public class MessageServiceImpl implements MessageService {
     private final WebSocketPresenceRegistry presenceRegistry;
 
     @Override
+    @Transactional 
     public GetMessageDTO saveMessage(CustomUserDetails principal, SendMessageDTO dto) {
 
         Long senderId = principal.getId();
 
-        User sender = userRepository.findById(senderId).orElseThrow(() -> new IllegalArgumentException("Sender not found"));
+        User sender = userRepository.findById(senderId).orElseThrow(() -> new UserNotFoundException(senderId));
 
         Conversation conversation = conversationService.getConversationForUser(dto.getConversationId(), senderId);
 
         Long otherUserId;
 
-        if (conversation.getUser1().getId().equals(senderId)) {
+        if (conversation.getUser1().getId().equals(senderId)){
             otherUserId = conversation.getUser2().getId();
         } else {
             otherUserId = conversation.getUser1().getId();
         }
 
-        if (userBlockService.isBlockedBetween(senderId, otherUserId)) {
+        if (userBlockService.isBlockedBetween(senderId, otherUserId)){
             throw new AccessDeniedException("You cannot send messages to this user.");
         }
 
-        if (!matchService.isMatched(senderId, otherUserId)) {
-            throw new IllegalArgumentException(
-                    "Users are not matched");
+        if (!matchService.isMatched(senderId, otherUserId)){
+            throw new IllegalArgumentException("Users are not matched");
         }
 
         Message message = new Message();
@@ -84,7 +87,7 @@ public class MessageServiceImpl implements MessageService {
 
         boolean receiverOnline = presenceRegistry.isOnline(otherUserId);
 
-        User receiverUser = userRepository.findById(otherUserId).orElseThrow(() -> new IllegalArgumentException("Receiver not found"));
+        User receiverUser = userRepository.findById(otherUserId).orElseThrow(() -> new UserNotFoundException(otherUserId));
 
         notificationService.notify(receiverUser, NotificationType.NEW_MESSAGE, saved.getId(), sender.getFirstName() + " " + sender.getLastName(), 
             Boolean.TRUE.equals(saved.getIsImage()) ? "Sent a photo" : saved.getContent(), !receiverOnline);

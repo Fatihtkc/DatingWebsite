@@ -1,16 +1,21 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "login_attempts", indexes = {
-    @Index(name = "idx_login_attempts_identifier", columnList = "identifier")
-})
-@Data
+@Table(
+    name = "login_attempts", 
+    indexes = {
+        @Index(name = "idx_login_attempt_identifier_success_time", columnList = "identifier, successful, attempted_at")
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginAttempt {

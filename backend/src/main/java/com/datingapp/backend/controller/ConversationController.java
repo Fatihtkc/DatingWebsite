@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/conversations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class ConversationController {
 
     private final ConversationService conversationService;
 
     @PostMapping("/{userId}")
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Long> createOrGetConversation(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long userId){
 
         ConversationDTO conversation = conversationService.getOrCreateConversation( principal.getId(), userId);

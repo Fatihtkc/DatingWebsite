@@ -1,4 +1,4 @@
-package com.datingapp.backend.dto;
+package com.datingapp.backend.dto.Notification;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -9,5 +9,5 @@ import org.springframework.data.domain.Pageable;
 public interface LikeService {
     Page<UserLikeDTO> getLikesByLiker(Long likerId, Pageable pageable);
     UserLike addLike(Long likerId, Long likedId);
-    void removeLike(Long likeId);
+    void removeLike(Long likeId, Long likerId);
 }

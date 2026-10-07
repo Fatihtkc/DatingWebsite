@@ -2,16 +2,19 @@ package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import com.datingapp.backend.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Entity
 @Table(name = "moderators")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Moderator {
@@ -19,7 +22,6 @@ public class Moderator {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    // Kişisel bilgiler
     private String firstName;
     private String lastName;
 
@@ -36,6 +38,7 @@ public class Moderator {
     @Column(nullable = false, unique = true)
     private String phone;
     
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)

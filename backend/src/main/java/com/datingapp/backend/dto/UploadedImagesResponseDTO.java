@@ -1,10 +1,11 @@
 package com.datingapp.backend.dto;
 
-import com.datingapp.backend.service.records.BatchUploadResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
+
+import com.datingapp.backend.records.BatchUploadResult;
 
 @Data
 @AllArgsConstructor

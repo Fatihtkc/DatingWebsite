@@ -1,17 +1,22 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import com.datingapp.backend.enums.NotificationType;
 
 @Entity
-@Table(name = "notifications", indexes = {
-    @Index(name = "idx_notification_recipient", columnList = "recipient_id")
-})
-@Data
+@Table(
+    name = "notifications", 
+    indexes = {
+        @Index(name = "idx_notification_recipient_created_at", columnList = "recipient_id, created_at"),
+        @Index(name = "idx_notification_recipient_read", columnList = "recipient_id, is_read")}
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Notification {

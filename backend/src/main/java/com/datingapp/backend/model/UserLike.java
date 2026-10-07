@@ -1,14 +1,26 @@
 package com.datingapp.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_likes", uniqueConstraints = {@UniqueConstraint(columnNames = {"liker_id", "liked_id"})})
-@Data
+@Table(
+    name = "user_likes",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_user_like", columnNames = {"liker_id", "liked_id"})
+    },
+    indexes = {
+        @Index(name = "idx_user_like_liker", columnList = "liker_id"),
+        @Index(name = "idx_user_like_liked", columnList = "liked_id"),
+        @Index(name = "idx_user_like_liker_liked", columnList = "liker_id, liked_id", unique = true)
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserLike {

@@ -11,33 +11,70 @@ import com.datingapp.backend.enums.Gender;
 import com.datingapp.backend.enums.RelationshipType;
 import com.datingapp.backend.enums.Smoking;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
+
 @Data
 @NoArgsConstructor
 public class UserUpdateDTO {
 
+    @Size(min = 3, max = 30)
+    private String username;
+
+    @Size(min = 2, max = 50)
     private String firstName;
+
+    @Size(min = 2, max = 50)
     private String lastName;
+
+    @Past
     private LocalDate birthDate;
+
     private Gender gender;
 
+    @DecimalMin(value = "50.0")
+    @DecimalMax(value = "250.0")
     private Double height;
-    private Double weight;
-    private BodyType bodyType;
 
+    @DecimalMin(value = "20.0")
+    @DecimalMax(value = "300.0")
+    private Double weight;
+
+    @Size(max = 500)
     private String location;
 
-    private RelationshipType relationshipType;
-
-    private String agePreference;
-    private String distancePreference;
-
-    private Smoking smoke;
-    private Alcohol alcohol;
-    private Diet diet;
-
+    @Size(max = 500)
     private String shorterBio;
 
+    @Size(max = 1000)
     private String hobbies;
+
+    @Size(max = 200)
     private String favoriteMusic;
+
+    @Size(max = 500)
     private String weekendPlans;
+
+    @Size(max = 500)
+    private BodyType bodyType;
+
+    @Size(max = 500)
+    private RelationshipType relationshipType;
+
+    @Size(max = 500)
+    private String agePreference;
+    
+    @Size(max = 500)
+    private String distancePreference;
+
+    @Size(max = 500)
+    private Smoking smoke;
+
+    @Size(max = 500)
+    private Alcohol alcohol;
+    
+    @Size(max = 500)
+    private Diet diet;
 }

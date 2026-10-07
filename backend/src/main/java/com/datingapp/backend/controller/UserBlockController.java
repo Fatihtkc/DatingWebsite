@@ -1,6 +1,6 @@
 package com.datingapp.backend.controller;
 
-import com.datingapp.backend.dto.UserBlockDTO;
+import com.datingapp.backend.dto.User.UserBlockDTO;
 import com.datingapp.backend.dto.User.UserProfileDTO;
 import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.security.CustomUserDetails;
@@ -26,10 +26,10 @@ public class UserBlockController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> blockUser(
-            @AuthenticationPrincipal CustomUserDetails principal,
-            @RequestBody UserBlockDTO dto) {
+    public ResponseEntity<Void> blockUser(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody UserBlockDTO dto){
+
         blockService.blockUser(principal.getId(), dto.getBlockedUserId());
+        
         return ResponseEntity.ok().build();
     }
 

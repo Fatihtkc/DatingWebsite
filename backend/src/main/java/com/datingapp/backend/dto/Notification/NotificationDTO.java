@@ -1,4 +1,4 @@
-package com.datingapp.backend.dto;
+package com.datingapp.backend.dto.Notification;
 
 import java.time.LocalDateTime;
 import lombok.Data;

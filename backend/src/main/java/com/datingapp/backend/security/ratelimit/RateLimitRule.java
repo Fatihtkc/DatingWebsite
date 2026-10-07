@@ -11,5 +11,5 @@ public record RateLimitRule(
     Duration window,                       
     KeyStrategy keyStrategy                
 ) {
-    public enum KeyStrategy { IP, USER }
+    public enum KeyStrategy { IP, USER, EMAIL }
 }
