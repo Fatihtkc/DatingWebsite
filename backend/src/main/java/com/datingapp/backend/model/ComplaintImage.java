@@ -21,7 +21,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ComplaintImage {
+public class ComplaintImage{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

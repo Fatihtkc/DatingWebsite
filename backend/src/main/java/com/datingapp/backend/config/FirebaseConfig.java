@@ -1,5 +1,6 @@
 package com.datingapp.backend.config;
 
+import com.datingapp.backend.exception.FirebaseInitializationException;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -26,7 +27,7 @@ public class FirebaseConfig {
                 FirebaseApp.initializeApp(options);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Firebase could not be initialized.", e);
+            throw new FirebaseInitializationException("Firebase could not be initialized.", e);
         }
     }
 }

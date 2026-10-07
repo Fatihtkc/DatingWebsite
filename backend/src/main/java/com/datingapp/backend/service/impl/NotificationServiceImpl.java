@@ -3,6 +3,7 @@ package com.datingapp.backend.service.impl;
 import com.datingapp.backend.dto.Notification.NotificationDTO;
 import com.datingapp.backend.dto.Notification.NotificationSettingsDTO;
 import com.datingapp.backend.enums.NotificationType;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.mapper.NotificationMapper;
 import com.datingapp.backend.model.Notification;
 import com.datingapp.backend.model.NotificationSettings;
@@ -108,7 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void updateSettings(Long userId, NotificationSettingsDTO dto){
 
-        NotificationSettings settings = settingsRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("Notification settings not found"));
+        NotificationSettings settings = settingsRepository.findByUserId(userId).orElseThrow(() -> new ResourceNotFoundException("Notification settings not found"));
 
         settings.setMatchNotificationsEnabled(dto.isMatchNotificationsEnabled());
         settings.setMessageNotificationsEnabled(dto.isMessageNotificationsEnabled());

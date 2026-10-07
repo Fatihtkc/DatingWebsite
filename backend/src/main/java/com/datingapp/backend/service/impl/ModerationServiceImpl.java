@@ -2,6 +2,7 @@ package com.datingapp.backend.service.impl;
 
 import com.datingapp.backend.dto.Complaint.ComplaintDTO;
 import com.datingapp.backend.dto.User.UserAdminDTO;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.mapper.ComplaintMapper;
 import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.model.User;
@@ -29,7 +30,7 @@ public class ModerationServiceImpl implements ModerationService {
     @Override
     public UserAdminDTO approveUser(Long userId){
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setApproved(true);
         user.setBanned(false);
 
@@ -39,7 +40,7 @@ public class ModerationServiceImpl implements ModerationService {
     @Override
     public UserAdminDTO banUser(Long userId){
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setBanned(true);
         refreshTokenService.revokeAll(user.getEmail());
 

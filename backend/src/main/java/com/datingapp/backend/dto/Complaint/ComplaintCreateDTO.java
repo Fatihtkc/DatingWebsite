@@ -3,10 +3,6 @@ package com.datingapp.backend.dto.Complaint;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-import com.datingapp.backend.dto.ImageDTO;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,6 +18,4 @@ public class ComplaintCreateDTO{
     @Size(min = 10, max = 1000)
     private String reason;
     
-    private List<ImageDTO> images;
-
 }

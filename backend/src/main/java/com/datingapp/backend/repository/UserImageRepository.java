@@ -1,6 +1,7 @@
 package com.datingapp.backend.repository;
 
 import com.datingapp.backend.enums.ModerationStatus;
+import com.datingapp.backend.model.ComplaintImage;
 import com.datingapp.backend.model.UserImage;
 
 import org.springframework.data.domain.Page;
@@ -19,6 +20,8 @@ public interface UserImageRepository extends JpaRepository<UserImage, Long> {
     List<UserImage> findByUserIdAndModerationStatus(Long userId, ModerationStatus moderationStatus);
 
     Optional<UserImage> findByIdAndModerationStatus(Long imageId, ModerationStatus moderationStatus);
+
+    List<ComplaintImage> findAllById(List<Long> ids);
 
     List<UserImage> findByUserId(Long userId);
 

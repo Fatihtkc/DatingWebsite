@@ -3,6 +3,7 @@ package com.datingapp.backend.service.impl;
 import com.datingapp.backend.dto.Like.UserLikeDTO;
 import com.datingapp.backend.enums.NotificationType;
 import com.datingapp.backend.exception.ConflictException;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.mapper.UserLikeMapper;
 import com.datingapp.backend.model.User;
 import com.datingapp.backend.model.UserLike;
@@ -48,11 +49,11 @@ public class LikeServiceImpl implements LikeService {
         }
 
         User liker = userRepository.findById(likerId)
-                .orElseThrow(() -> new RuntimeException("Liker user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Liker user not found"));
         User liked = userRepository.findById(likedId)
-                .orElseThrow(() -> new RuntimeException("Liked user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Liked user not found"));
         if (likeRepository.findByLikerIdAndLikedId(likerId, likedId).isPresent()) {
-            throw new RuntimeException("User already liked");
+            throw new ConflictException("User already liked");
         }
 
         UserLike like = new UserLike();
@@ -70,8 +71,6 @@ public class LikeServiceImpl implements LikeService {
         } catch (DataIntegrityViolationException ex) {
             throw new ConflictException("User already liked");
         }
-
-
     }
 
     @Override

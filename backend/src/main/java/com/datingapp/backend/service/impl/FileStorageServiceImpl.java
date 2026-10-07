@@ -5,6 +5,8 @@ import com.datingapp.backend.service.FileStorageService;
 import com.datingapp.backend.service.FileUploadResult;
 import com.datingapp.backend.service.ImageModerationService;
 import com.datingapp.backend.exception.ContentPolicyViolationException;
+import com.datingapp.backend.exception.FileStorageException;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.records.BatchUploadResult;
 
 import net.coobird.thumbnailator.Thumbnails;
@@ -62,7 +64,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (IOException ex){
-            throw new RuntimeException("Could not create upload directory.", ex);
+            throw new FileStorageException("Could not create upload directory.", ex);
         }
     }
 
@@ -127,7 +129,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Thumbnails.of(image).size(MAX_DIMENSION, MAX_DIMENSION).outputFormat(outputExtension).toFile(targetLocation.toFile());
         } catch (IOException ex) {
-            throw new RuntimeException("The file could not be saved: " + generatedFilename, ex);
+            throw new FileStorageException("The file could not be saved: " + generatedFilename, ex);
         }
 
         String fileUrl = "/uploads/" + generatedFilename;
@@ -193,10 +195,10 @@ public class FileStorageServiceImpl implements FileStorageService {
                 return resource;
             }
 
-            throw new RuntimeException("File not found: " + filename);
+            throw new ResourceNotFoundException("File not found: " + filename);
 
         } catch (MalformedURLException ex) {
-            throw new RuntimeException("The file could not be loaded: " + filename, ex);
+            throw new FileStorageException("The file could not be loaded: " + filename, ex);
         }
     }
 

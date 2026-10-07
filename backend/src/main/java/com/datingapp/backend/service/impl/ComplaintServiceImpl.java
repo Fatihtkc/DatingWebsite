@@ -2,8 +2,8 @@ package com.datingapp.backend.service.impl;
 
 import com.datingapp.backend.dto.Complaint.ComplaintCreateDTO;
 import com.datingapp.backend.dto.Complaint.ComplaintDTO;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.mapper.ComplaintMapper;
-import com.datingapp.backend.mapper.ImageMapper;
 import com.datingapp.backend.model.Complaint;
 import com.datingapp.backend.model.ComplaintImage;
 import com.datingapp.backend.model.User;
@@ -11,6 +11,7 @@ import com.datingapp.backend.projection.ComplaintProjection;
 import com.datingapp.backend.repository.ComplaintRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.ComplaintService;
+import com.datingapp.backend.service.FileUploadResult;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +31,7 @@ public class ComplaintServiceImpl implements ComplaintService{
     private final ComplaintRepository complaintRepository;
     private final UserRepository userRepository;
     private final ComplaintMapper complaintMapper;
-    private final ImageMapper imageMapper;
+    private final FileStorageServiceImpl storage;
     
     @Override
     public Page<ComplaintDTO> getAllComplaints(Pageable pageable){
@@ -43,7 +45,7 @@ public class ComplaintServiceImpl implements ComplaintService{
         ComplaintProjection projection = complaintRepository.findComplaintProjectionById(id);
 
         if (projection == null){
-            throw new RuntimeException("Complaint not found with id: " + id);
+            throw new ResourceNotFoundException("Complaint not found with id: " + id);
         }
 
         return complaintMapper.toDTO(projection);
@@ -51,11 +53,11 @@ public class ComplaintServiceImpl implements ComplaintService{
 
     @Override
     @Transactional 
-    public ComplaintDTO createComplaint(Long complainantId, ComplaintCreateDTO dto){
+    public ComplaintDTO createComplaint(Long complainantId, ComplaintCreateDTO dto, List<MultipartFile> files){
         
-        User complainant = userRepository.findById(complainantId).orElseThrow(() -> new RuntimeException("Complainant not found"));
+        User complainant = userRepository.findById(complainantId).orElseThrow(() -> new ResourceNotFoundException("Complainant not found"));
 
-        User complained = userRepository.findById(dto.getComplainedId()).orElseThrow(() -> new RuntimeException("Complained user not found"));
+        User complained = userRepository.findById(dto.getComplainedId()).orElseThrow(() -> new ResourceNotFoundException("Complained user not found"));
 
         Complaint complaint = new Complaint();
         complaint.setComplainant(complainant);
@@ -63,11 +65,13 @@ public class ComplaintServiceImpl implements ComplaintService{
         complaint.setReason(dto.getReason());
         complaint.setComplaintDate(LocalDateTime.now());
 
-        if (dto.getImages() != null){
+        if (files != null && !files.isEmpty()){
 
-            List<ComplaintImage> images = dto.getImages().stream().map(imageMapper::toComplaintImageEntity).toList();
+            for (MultipartFile file : files) {
 
-            for (ComplaintImage image : images){
+                FileUploadResult result = storage.storeFile(file);
+                ComplaintImage image = new ComplaintImage();
+                image.setImageUrl(result.url());
                 complaint.addImage(image);
             }
         }
@@ -84,7 +88,7 @@ public class ComplaintServiceImpl implements ComplaintService{
     public void deleteComplaint(Long id){
 
         if (!complaintRepository.existsById(id)) {
-            throw new RuntimeException("Complaint not found with id: " + id);
+            throw new ResourceNotFoundException("Complaint not found with id: " + id);
         }
         complaintRepository.deleteById(id);
     }

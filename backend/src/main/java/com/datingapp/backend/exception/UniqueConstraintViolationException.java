@@ -1,7 +1,9 @@
 package com.datingapp.backend.exception;
 
-public class UniqueConstraintViolationException extends RuntimeException {
-    public UniqueConstraintViolationException(String message) {
+public class UniqueConstraintViolationException extends RuntimeException{
+
+    public UniqueConstraintViolationException(String message){
         super(message);
     }
+
 }

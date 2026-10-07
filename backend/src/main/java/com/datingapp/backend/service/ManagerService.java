@@ -17,13 +17,13 @@ public interface ManagerService{
     void fireModerator(Long moderatorId);
     ModeratorUpdateDTO updateModerator(Long moderatorId, ModeratorUpdateDTO dto, MultipartFile file);
     ModeratorUpdateDTO getModeratorById(Long id);
-    boolean updatePasswordModerator(Long authenticatedUserId,PasswordChangeRequestDTO request);
+    void updatePasswordModerator(Long authenticatedUserId,PasswordChangeRequestDTO request);
     Page<ModeratorUpdateDTO> listAllModerators(Pageable page);
 
     ManagerUpdateDTO hireManager(ManagerCreateDTO dto, MultipartFile file);
     void fireManager(Long managerId);
     ManagerUpdateDTO updateManager(Long managerId, ManagerUpdateDTO dto, MultipartFile file);
-    boolean updatePasswordManager(Long authenticatedUserId, PasswordChangeRequestDTO request);
+    void updatePasswordManager(Long authenticatedUserId, PasswordChangeRequestDTO request);
     Page<ManagerUpdateDTO> listAllManagers(Pageable page);
     ManagerUpdateDTO getManagerById(Long id);
 

@@ -60,8 +60,8 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public Match createMatch(Long userId1, Long userId2){
 
-        UserLike like1 = likeRepository.findByLikerIdAndLikedId(userId1, userId2).orElseThrow(() -> new RuntimeException("User1 hasn't liked User2"));
-        UserLike like2 = likeRepository.findByLikerIdAndLikedId(userId2, userId1).orElseThrow(() -> new RuntimeException("User2 hasn't liked User1"));
+        UserLike like1 = likeRepository.findByLikerIdAndLikedId(userId1, userId2).orElseThrow(() -> new ConflictException("User1 hasn't liked User2"));
+        UserLike like2 = likeRepository.findByLikerIdAndLikedId(userId2, userId1).orElseThrow(() -> new ConflictException("User2 hasn't liked User1"));
     
         Match existingMatch = findExistingMatch(userId1, userId2);
         if (existingMatch != null){

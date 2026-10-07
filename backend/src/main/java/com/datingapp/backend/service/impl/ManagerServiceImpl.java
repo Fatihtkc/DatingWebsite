@@ -8,6 +8,7 @@ import com.datingapp.backend.dto.Moderator.ModeratorUpdateDTO;
 import com.datingapp.backend.dto.User.UserAdminDTO;
 import com.datingapp.backend.enums.Role;
 import com.datingapp.backend.exception.InvalidPasswordException;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
 import com.datingapp.backend.mapper.ManagerMapper;
 import com.datingapp.backend.mapper.ModeratorMapper;
@@ -84,7 +85,7 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ModeratorUpdateDTO updateModerator(Long moderatorId, ModeratorUpdateDTO dto, MultipartFile file){
 
-        Moderator existing = moderatorRepo.findById(moderatorId).orElseThrow(() -> new RuntimeException("Moderator not found"));
+        Moderator existing = moderatorRepo.findById(moderatorId).orElseThrow(() -> new ResourceNotFoundException("Moderator not found"));
 
         Optional<Moderator> byEmail = moderatorRepo.findByEmail(dto.getEmail());
 
@@ -112,7 +113,6 @@ public class ManagerServiceImpl implements ManagerService {
         Moderator saved = moderatorRepo.save(existing);
 
         return moderatorMapper.toDTO(saved);
-
     }
 
     @Override
@@ -122,15 +122,15 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ModeratorUpdateDTO getModeratorById(Long id){
-        return moderatorMapper.toDTO(moderatorRepo.findById(id).orElseThrow(() -> new RuntimeException("Moderator not found with id: " + id)));
+        return moderatorMapper.toDTO(moderatorRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Moderator not found with id: " + id)));
     }
 
     @Override
-    public boolean updatePasswordModerator(Long authenticatedUserId,PasswordChangeRequestDTO request){
+    public void updatePasswordModerator(Long authenticatedUserId,PasswordChangeRequestDTO request){
 
         Optional<Moderator> optionalModerator = moderatorRepo.findById(authenticatedUserId);
-        if (optionalModerator.isEmpty()) {
-            return false;
+        if (optionalModerator.isEmpty()){
+            throw new ResourceNotFoundException("Moderator not found");
         }
 
         Moderator moderator = optionalModerator.get();
@@ -142,27 +142,26 @@ public class ManagerServiceImpl implements ManagerService {
         String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
         moderator.setPassword(hashedNewPassword);
         moderatorRepo.save(moderator);
-        return true;
     }
 
     @Override
-    public boolean updatePasswordManager(Long authenticatedUserId,PasswordChangeRequestDTO request){
+    public void updatePasswordManager(Long authenticatedUserId,PasswordChangeRequestDTO request){
 
         Optional<Manager> optionalManager = managerRepo.findById(authenticatedUserId);
         if (optionalManager.isEmpty()) {
-            return false;
+            throw new ResourceNotFoundException("Manager not found");
         }
 
         Manager manager = optionalManager.get();
 
         if (!passwordEncoder.matches(request.getOldPassword(), manager.getPassword())){
-            return false;
+            throw new InvalidPasswordException(
+                "Old password is incorrect");
         }
 
         String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
         manager.setPassword(hashedNewPassword);
         managerRepo.save(manager);
-        return true;
     }
 
     @Override
@@ -202,7 +201,7 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ManagerUpdateDTO updateManager(Long managerId, ManagerUpdateDTO dto, MultipartFile file){
 
-        Manager existing = managerRepo.findById(managerId).orElseThrow(() -> new RuntimeException("Moderator not found"));
+        Manager existing = managerRepo.findById(managerId).orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
 
         Optional<Manager> byEmail = managerRepo.findByEmail(dto.getEmail());
 
@@ -239,8 +238,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ManagerUpdateDTO getManagerById(Long id){
-        return managerMapper.toDTO(managerRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Manager not found with id: " + id)));
+        return managerMapper.toDTO(managerRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Manager not found with id: " + id)));
     }
 
     @Override
@@ -252,13 +250,11 @@ public class ManagerServiceImpl implements ManagerService {
     @Transactional
     public UserAdminDTO updateUserInfo(Long userId, UserAdminDTO dto){
 
-        User existingUser = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-
+        User existingUser = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         existingUser.setApproved(dto.isApproved());
         existingUser.setBanned(dto.isBanned());
         existingUser.setConfirmed(dto.isConfirmed());
         existingUser.setPersonalityScore(dto.getPersonalityScore());
-        existingUser.setRole(dto.getRole());
 
         User saved = userRepo.save(existingUser);
         return userMapper.toAdminDTO(saved);

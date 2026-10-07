@@ -5,22 +5,16 @@ import com.datingapp.backend.dto.User.NearbyUserDTO;
 import com.datingapp.backend.dto.User.UserCreateDTO;
 import com.datingapp.backend.dto.User.UserProfileDTO;
 import com.datingapp.backend.dto.User.UserUpdateDTO;
-import com.datingapp.backend.exception.UniqueConstraintViolationException;
-import com.datingapp.backend.model.User;
 import com.datingapp.backend.security.CustomUserDetails;
-import com.datingapp.backend.service.LoginService;
 import com.datingapp.backend.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,16 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final LoginService loginService;
 
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails principal){
 
-        Long userId = principal.getId();
-
-        return ResponseEntity.ok(userService.getUserById(userId, principal.getId()));
-
+        return ResponseEntity.ok(userService.getUserById(principal.getId()));
     }
 
     @GetMapping("/allprofiles")
@@ -69,24 +59,14 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileDTO> getByEmail(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable String email){
 
-        Optional<User> optionalUser = loginService.findUserByEmail(email);
-
-        return optionalUser
-            .map(user -> ResponseEntity.ok(userService.getUserById(user.getId(),principal.getId())))
-            .orElseGet(() ->ResponseEntity.notFound().build());
-
+        return ResponseEntity.ok(userService.getUserByEmail(email, principal.getId()));
     }
 
     @GetMapping("/check-user")
     public ResponseEntity<?> checkUser(@RequestParam String email, @RequestParam String username){
 
-        try {
-            userService.checkUser(email, username);
-            return ResponseEntity.ok().build();
-        } catch (UniqueConstraintViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
-
+        userService.checkUser(email, username);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signup")

@@ -1,7 +1,5 @@
 package com.datingapp.backend.controller;
 
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +7,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.datingapp.backend.dto.FcmTokenUpdateDTO;
 import com.datingapp.backend.dto.Notification.NotificationDTO;
 import com.datingapp.backend.dto.Notification.NotificationSettingsDTO;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.NotificationService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,9 +26,9 @@ public class NotificationController {
 
     @PutMapping("/fcm-token")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> updateFcmToken(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody Map<String, String> body){
+    public ResponseEntity<Void> updateFcmToken(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid FcmTokenUpdateDTO dto){
 
-        notificationService.updateFcmToken(principal.getId(), body.get("token"));
+        notificationService.updateFcmToken(principal.getId(), dto.getToken());
 
         return ResponseEntity.ok().build();
     }

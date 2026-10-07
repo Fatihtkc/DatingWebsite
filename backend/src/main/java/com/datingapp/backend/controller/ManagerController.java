@@ -23,8 +23,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -64,7 +62,7 @@ public class ManagerController {
 
     @PutMapping("/moderator/change-password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changePassword(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody PasswordChangeRequestDTO request){
+    public ResponseEntity<?> changePasswordModerator(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody PasswordChangeRequestDTO request){
 
         managerService.updatePasswordModerator(principal.getId(), request);
 
@@ -98,13 +96,9 @@ public class ManagerController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changePasswordManager(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid PasswordChangeRequestDTO request){
 
-        boolean success = managerService.updatePasswordManager(principal.getId(), request);
+        managerService.updatePasswordManager(principal.getId(), request);
 
-        if (success) {
-            return ResponseEntity.ok(Map.of("success", true, "message", "Password updated successfully."));
-        } else {
-            return ResponseEntity.ok(Map.of("success", false, "message", "Old password is incorrect."));
-        }
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/managers", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

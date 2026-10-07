@@ -3,6 +3,7 @@ package com.datingapp.backend.service.impl;
 import com.datingapp.backend.dto.ImageDTO;
 import com.datingapp.backend.dto.UploadedImagesResponseDTO;
 import com.datingapp.backend.enums.ModerationStatus;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.mapper.ImageMapper;
 import com.datingapp.backend.model.User;
@@ -41,7 +42,7 @@ public class UserImageServiceImpl implements UserImageService {
 
     @Override
     public ImageDTO getImageById(Long imageId){
-        UserImage userImage = userImageRepository.findByIdAndModerationStatus(imageId, ModerationStatus.APPROVED).orElseThrow(() -> new RuntimeException("Image not found with id: " + imageId));
+        UserImage userImage = userImageRepository.findByIdAndModerationStatus(imageId, ModerationStatus.APPROVED).orElseThrow(() -> new ResourceNotFoundException("Image not found with id: " + imageId));
         return userImageMapper.toDTO(userImage);
     }
 
@@ -68,7 +69,7 @@ public class UserImageServiceImpl implements UserImageService {
     @Transactional
     public void approveImage(Long imageId){
 
-        UserImage image = userImageRepository.findById(imageId).orElseThrow(() -> new RuntimeException("Image not found"));
+        UserImage image = userImageRepository.findById(imageId).orElseThrow(() -> new ResourceNotFoundException("Image not found"));
         image.setModerationStatus(ModerationStatus.APPROVED);
         userImageRepository.save(image);
     }

@@ -21,12 +21,14 @@ import com.datingapp.backend.dto.User.NearbyUserDTO;
 import com.datingapp.backend.dto.User.UserCreateDTO;
 import com.datingapp.backend.dto.User.UserProfileDTO;
 import com.datingapp.backend.dto.User.UserUpdateDTO;
+import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.exception.UniqueConstraintViolationException;
 import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.service.FileStorageService;
 import com.datingapp.backend.service.RefreshTokenService;
 import com.datingapp.backend.service.UserBlockService;
+import com.datingapp.backend.service.LoginService;
 
 import java.util.List;
 
@@ -39,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserBlockService userBlockService;
     private final RefreshTokenService refreshTokenService;
+    private final LoginService loginService;
     private final FileStorageService storage;
     private final UserImageRepository userImageRepository;
     private final JwtUtil jwtUtil;
@@ -46,6 +49,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserProfileDTO> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(userMapper::toDTO);
+    }
+    
+    @Override
+    public UserProfileDTO getUserById(Long id){
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        return userMapper.toDTO(user);
     }
 
     @Override
@@ -58,6 +67,13 @@ public class UserServiceImpl implements UserService {
         }
 
         return userMapper.toDTO(user);
+    }
+
+    @Override
+    public UserProfileDTO getUserByEmail(String email, Long requesterId){
+        User user = loginService.findUserByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return getUserById(user.getId(), requesterId);
     }
 
     private User getUserEntityById(Long id){

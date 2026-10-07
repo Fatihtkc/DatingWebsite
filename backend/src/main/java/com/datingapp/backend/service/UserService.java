@@ -14,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     Page<UserProfileDTO> getAllUsers(Pageable pageable);
+    UserProfileDTO getUserById(Long id);
     UserProfileDTO getUserById(Long id, Long requesterId);
+    UserProfileDTO getUserByEmail(String email, Long requesterId);
     JwtResponseDTO createUser(UserCreateDTO dto);
     UserProfileDTO updateUser(Long id, UserUpdateDTO dto);
     void deleteUser(Long id);
