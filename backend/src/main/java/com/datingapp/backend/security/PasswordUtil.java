@@ -7,17 +7,15 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class PasswordUtil {
+public class PasswordUtil{
 
     private final PasswordEncoder encoder;
 
-    public String encodePassword(String rawPassword) {
+    public String encodePassword(String rawPassword){
         return encoder.encode(rawPassword);
     }
 
-    public boolean checkPassword(
-            String rawPassword,
-            String encodedPassword) {
+    public boolean checkPassword(String rawPassword, String encodedPassword){
         return encoder.matches(rawPassword, encodedPassword);
     }
 }

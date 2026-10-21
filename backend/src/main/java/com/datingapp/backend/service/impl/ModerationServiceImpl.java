@@ -6,11 +6,16 @@ import com.datingapp.backend.exception.ResourceNotFoundException;
 import com.datingapp.backend.mapper.ComplaintMapper;
 import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.model.UserImage;
 import com.datingapp.backend.repository.ComplaintRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.ModerationService;
+import com.datingapp.backend.service.UserImageService;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +31,7 @@ public class ModerationServiceImpl implements ModerationService {
     private final UserMapper userMapper;
     private final ComplaintMapper complaintMapper;
     private final RefreshTokenServiceImpl refreshTokenService;
+    private final UserImageService userImageService;
 
     @Override
     public UserAdminDTO approveUser(Long userId){
@@ -49,7 +55,11 @@ public class ModerationServiceImpl implements ModerationService {
 
     @Override
     public Page<UserAdminDTO> listPendingUsers(Pageable pageable){
-        return userRepository.findByApprovedFalse(pageable).map(userMapper::toAdminDTO);
+        Page<User> users = userRepository.findByApprovedFalse(pageable);
+
+        Map<Long, List<UserImage>> imagesByUserId = userImageService.loadApprovedImages(users.getContent());
+
+        return users.map(user ->userMapper.toAdminDTO(user, imagesByUserId.getOrDefault(user.getId(), List.of())));
     }
 
     @Override

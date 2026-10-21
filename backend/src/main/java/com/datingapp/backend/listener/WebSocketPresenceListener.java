@@ -25,7 +25,7 @@ public class WebSocketPresenceListener {
     public void handleConnect(SessionConnectedEvent event){
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         Long userId = extractUserId(accessor.getUser());
-        if (userId != null) {
+        if (userId != null){
             presenceRegistry.userConnected(userId, accessor.getSessionId());
         }
     }
@@ -34,7 +34,7 @@ public class WebSocketPresenceListener {
     public void handleDisconnect(SessionDisconnectEvent event){
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         Long userId = extractUserId(accessor.getUser());
-        if (userId != null) {
+        if (userId != null){
             presenceRegistry.userDisconnected(userId, accessor.getSessionId());
         }
     }

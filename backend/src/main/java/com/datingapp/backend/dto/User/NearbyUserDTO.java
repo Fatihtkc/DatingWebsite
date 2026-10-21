@@ -27,7 +27,6 @@ public class NearbyUserDTO {
     private Gender gender;
 
     private Double height;
-    private Double weight;
     private BodyType bodyType;
 
     private String location;

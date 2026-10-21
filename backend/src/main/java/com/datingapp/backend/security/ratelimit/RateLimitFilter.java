@@ -31,7 +31,7 @@ public class RateLimitFilter extends OncePerRequestFilter{
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+                @NonNull FilterChain filterChain) throws ServletException, IOException{
 
         for (RateLimitRule rule : rules){
             if (rule.matcher().test(request)){
@@ -54,7 +54,7 @@ public class RateLimitFilter extends OncePerRequestFilter{
         filterChain.doFilter(request, response);
     }
 
-    private Bucket newBucket(RateLimitRule rule) {
+    private Bucket newBucket(RateLimitRule rule){
 
         Bandwidth limit = Bandwidth.builder().capacity(rule.capacity()).refillGreedy(rule.capacity(), rule.window()).build();
 

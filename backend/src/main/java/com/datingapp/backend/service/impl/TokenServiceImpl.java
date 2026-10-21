@@ -31,7 +31,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     @Transactional
-    public void createToken(User user, String token, Token.TokenType type, Duration validity) {
+    public void createToken(User user, String token, Token.TokenType type, Duration validity){
 
         LocalDateTime expiryDate = LocalDateTime.now().plus(validity);
 
@@ -45,16 +45,14 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     @Transactional(readOnly = true)
-    public User validateToken(String token, Token.TokenType type) {
+    public User validateToken(String token, Token.TokenType type){
 
         String tokenHash = hash(token);
 
         LocalDateTime now = LocalDateTime.now();
 
-        return tokenRepository.findByTokenHashAndType(tokenHash, type)
-            .filter(t -> t.getExpiryDate()
-            .isAfter(now))
-            .map(t -> t.getUser())
+        return tokenRepository.findByHashTokenAndTypeForUpdate(tokenHash, type)
+            .filter(t -> t.getExpiryDate().isAfter(now)).map(t -> t.getUser())
             .orElseThrow(() -> new IllegalArgumentException("The token is invalid or has expired."));
     }
 
@@ -67,11 +65,18 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional 
     public void resetPassword(String token, String newPassword){
-        User user = validateToken(token, Token.TokenType.PASSWORD_RESET);
+
+        String tokenHash = hash(token);
+
+        Token storedToken = tokenRepository.findByHashTokenAndTypeForUpdate(tokenHash, Token.TokenType.PASSWORD_RESET)
+            .filter(t -> t.getExpiryDate().isAfter(LocalDateTime.now()))
+            .orElseThrow(() -> new IllegalArgumentException("The token is invalid or has expired."));
+
+        User user = storedToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         refreshTokenService.revokeAll(user.getEmail());
-        invalidateToken(hash(token));
+        tokenRepository.delete(storedToken);
     }
 
     @Override
@@ -83,7 +88,7 @@ public class TokenServiceImpl implements TokenService {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             return HexFormat.of().formatHex(md.digest(raw.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
+        } catch (Exception e){
             throw new IllegalStateException(e);
         }
     }

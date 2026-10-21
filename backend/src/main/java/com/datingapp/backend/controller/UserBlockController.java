@@ -2,10 +2,10 @@ package com.datingapp.backend.controller;
 
 import com.datingapp.backend.dto.User.UserBlockDTO;
 import com.datingapp.backend.dto.User.UserProfileDTO;
-import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.UserBlockService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -17,16 +17,15 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/blocks")
+@RequestMapping("/api/blocks")
 @RequiredArgsConstructor 
 public class UserBlockController {
 
     private final UserBlockService blockService;
-    private final UserMapper userMapper;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> blockUser(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody UserBlockDTO dto){
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
+    public ResponseEntity<Void> blockUser(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid UserBlockDTO dto){
 
         blockService.blockUser(principal.getId(), dto.getBlockedUserId());
         
@@ -34,7 +33,7 @@ public class UserBlockController {
     }
 
     @DeleteMapping("/{blockedUserId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Void> unblockUser(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long blockedUserId){
 
         blockService.unblockUser(principal.getId(), blockedUserId);
@@ -43,11 +42,9 @@ public class UserBlockController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Page<UserProfileDTO>> getBlockedUsers(@AuthenticationPrincipal CustomUserDetails principal, @PageableDefault(page = 0, size = 20) Pageable pageable){
 
-        Page<UserProfileDTO> blocked = blockService.getBlockedUsers(principal.getId(), pageable).map(userMapper::toDTO);
-
-        return ResponseEntity.ok(blocked);
+        return ResponseEntity.ok(blockService.getBlockedUsers(principal.getId(), pageable));
     }
 }

@@ -39,9 +39,9 @@ public class ComplaintController {
         return ResponseEntity.ok(compService.getComplaint(id));
     }
 
-    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ComplaintDTO> createComplaint(@RequestBody @Valid ComplaintCreateDTO dto, 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
+    public ResponseEntity<ComplaintDTO> createComplaint(@RequestPart("data") @Valid ComplaintCreateDTO dto, 
         @AuthenticationPrincipal CustomUserDetails principal, 
         @RequestPart(value = "images", required = false) List<MultipartFile> files){
 

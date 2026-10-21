@@ -15,7 +15,7 @@ import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.FileStorageService;
 import com.datingapp.backend.service.UserImageService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j 
 @Service
@@ -128,7 +130,19 @@ public class UserImageServiceImpl implements UserImageService {
             }
             throw e;
         }
+    }
 
-        
+    @Override
+    public Map<Long, List<UserImage>> loadApprovedImages(List<User> users){
+
+        if(users.isEmpty()){
+            return Map.of();
+        }
+
+        List<Long> userIds = users.stream().map(User::getId).toList();
+
+        List<UserImage> images = userImageRepository.findImagesByUserIdsAndStatus(userIds, ModerationStatus.APPROVED);
+
+        return images.stream().collect(Collectors.groupingBy(image -> image.getUser().getId()));
     }
 }

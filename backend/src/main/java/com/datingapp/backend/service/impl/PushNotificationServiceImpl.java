@@ -25,7 +25,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     @Override
     public void send(Long userId, String fcmToken, String title, String body, String relatedEntityId){
 
-        if (fcmToken == null || fcmToken.isBlank()){
+        if(fcmToken == null || fcmToken.isBlank()){
             return;
         }
 
@@ -37,14 +37,14 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
         try {
             FirebaseMessaging.getInstance().send(message);
-        } catch (FirebaseMessagingException e) {
-            if (isInvalidToken(e)){
+        } catch (FirebaseMessagingException e){
+            if(isInvalidToken(e)){
 
                 notificationService.clearFcmToken(userId);
 
                 log.warn("Removed invalid FCM token for user {}",userId);
 
-            } else{
+            }else{
 
                 log.warn("FCM notification failed for user {}: {}",userId,e.getMessage());
             }

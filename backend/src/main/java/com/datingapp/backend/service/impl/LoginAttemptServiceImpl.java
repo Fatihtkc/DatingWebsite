@@ -32,7 +32,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
         repository.save(new LoginAttempt(null, email, "EMAIL", now, successful));
         repository.save(new LoginAttempt(null, ip, "IP", now, successful));
 
-        if (successful) {
+        if(successful){
             repository.clearAttempts(email);
         }
     }

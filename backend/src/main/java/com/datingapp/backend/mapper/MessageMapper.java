@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MessageMapper {
     
-    public GetMessageDTO toDTO(Message message) {
+    public GetMessageDTO toDTO(Message message){
         GetMessageDTO dto = new GetMessageDTO();
         dto.setId(message.getId());
         dto.setConversationId(message.getConversation().getId());

@@ -13,9 +13,12 @@ import com.datingapp.backend.enums.ModerationStatus;
 import com.datingapp.backend.enums.RelationshipType;
 import com.datingapp.backend.enums.Smoking;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.model.UserImage;
 import com.datingapp.backend.projection.NearbyUserProjection;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -36,7 +39,6 @@ public class UserMapper {
         dto.setBirthDate(user.getBirthDate());
         dto.setGender(user.getGender());
         dto.setHeight(user.getHeight());
-        dto.setWeight(user.getWeight());
         dto.setBodyType(user.getBodyType());
         dto.setLocation(user.getLocation());
         dto.setRelationshipType(user.getRelationshipType());
@@ -53,6 +55,32 @@ public class UserMapper {
         return dto;
     }
 
+    public UserProfileDTO toDTO(User user, List<UserImage> images){
+        UserProfileDTO dto = new UserProfileDTO();
+
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setGender(user.getGender());
+        dto.setHeight(user.getHeight());
+        dto.setBodyType(user.getBodyType());
+        dto.setLocation(user.getLocation());
+        dto.setRelationshipType(user.getRelationshipType());
+        dto.setAlcohol(user.getAlcohol());
+        dto.setSmoke(user.getSmoke());
+        dto.setDiet(user.getDiet());
+        dto.setShorterBio(user.getShorterBio());
+        dto.setHobbies(user.getHobbies());
+        dto.setFavoriteMusic(user.getFavoriteMusic());
+        dto.setWeekendPlans(user.getWeekendPlans());
+
+        dto.setImages(images.stream().map(userImageMapper::toDTO).toList());
+
+        return dto;
+    }
+
     public UserUpdateDTO toUpdateDTO(User user){
 
         UserUpdateDTO dto = new UserUpdateDTO();
@@ -62,7 +90,6 @@ public class UserMapper {
         dto.setBirthDate(user.getBirthDate());
         dto.setGender(user.getGender());
         dto.setHeight(user.getHeight());
-        dto.setWeight(user.getWeight());
         dto.setBodyType(user.getBodyType());
         dto.setLocation(user.getLocation());
         dto.setRelationshipType(user.getRelationshipType());
@@ -118,6 +145,24 @@ public class UserMapper {
         return dto;
     }
 
+    public UserAdminDTO toAdminDTO(User user, List<UserImage> images){
+        UserAdminDTO dto = new UserAdminDTO();
+
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setApproved(user.isApproved());
+        dto.setBanned(user.isBanned());
+        dto.setConfirmed(user.isConfirmed());
+        dto.setPersonalityScore(user.getPersonalityScore());
+
+        dto.setImages(images.stream().map(userImageMapper::toDTO).toList());
+
+        return dto;
+    }
+
     public User toEntity(UserProfileDTO dto){
 
         User user = new User();
@@ -129,7 +174,6 @@ public class UserMapper {
         user.setBirthDate(dto.getBirthDate());
         user.setGender(dto.getGender());
         user.setHeight(dto.getHeight());
-        user.setWeight(dto.getWeight());
         user.setBodyType(dto.getBodyType());
         user.setLocation(dto.getLocation());
         user.setRelationshipType(dto.getRelationshipType());
@@ -144,7 +188,7 @@ public class UserMapper {
         return user;
     }
 
-    public User toEntity(UserUpdateDTO dto) {
+    public User toEntity(UserUpdateDTO dto){
         User user = new User();
 
         user.setFirstName(dto.getFirstName());
@@ -152,7 +196,6 @@ public class UserMapper {
         user.setBirthDate(dto.getBirthDate());
         user.setGender(dto.getGender());
         user.setHeight(dto.getHeight());
-        user.setWeight(dto.getWeight());
         user.setBodyType(dto.getBodyType());
         user.setLocation(dto.getLocation());
         user.setRelationshipType(dto.getRelationshipType());
@@ -181,7 +224,6 @@ public class UserMapper {
         user.setBirthDate(dto.getBirthDate());
         user.setGender(dto.getGender());
         user.setHeight(dto.getHeight());
-        user.setWeight(dto.getWeight());
         user.setBodyType(dto.getBodyType());
         user.setLocation(dto.getLocation());
         user.setRelationshipType(dto.getRelationshipType());

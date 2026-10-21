@@ -36,7 +36,7 @@ public class ImageModerationServiceImpl implements ImageModerationService {
     @Override
     public ModerationStatus moderate(byte[] imageBytes){
 
-        try {
+        try{
             Image image = Image.builder()
                 .bytes(SdkBytes.fromByteArray(imageBytes)).build();
 
@@ -48,7 +48,7 @@ public class ImageModerationServiceImpl implements ImageModerationService {
             boolean hasViolation = response.moderationLabels().stream()
                 .anyMatch(label -> BLOCKED_LABELS.contains(label.name()));
 
-            if (hasViolation) {
+            if (hasViolation){
                 log.warn("Inappropriate content detected. Tags: {}",
                     response.moderationLabels().stream().map(ModerationLabel::name).toList());
                 return ModerationStatus.REJECTED;
@@ -56,7 +56,7 @@ public class ImageModerationServiceImpl implements ImageModerationService {
 
             return ModerationStatus.APPROVED;
 
-        } catch (Exception e) {
+        } catch (Exception e){
             log.error("Rekognition call failed.", e);
             return ModerationStatus.PENDING;
         }

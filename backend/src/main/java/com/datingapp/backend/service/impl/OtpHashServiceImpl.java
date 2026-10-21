@@ -34,7 +34,7 @@ public class OtpHashServiceImpl implements OtpHashService {
 
             return HexFormat.of().formatHex(result);
 
-        } catch (Exception e) {
+        } catch (Exception e){
             throw new IllegalStateException("Could not hash OTP", e);
         }
     }

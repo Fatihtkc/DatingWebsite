@@ -5,9 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 import java.time.LocalDateTime;
 
@@ -79,7 +86,7 @@ public class GlobalExceptionHandler{
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String code, String message, HttpServletRequest request){
 
-        ErrorResponse error = new ErrorResponse(LocalDateTime.now(), status.value(), code, message, request.getRequestURI());
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(), status.value(), code, message, request.getRequestURI(), null);
 
         return ResponseEntity.status(status).body(error);
     }
@@ -87,7 +94,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex, HttpServletRequest request){
 
-        ErrorResponse error = new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), "CONFLICT", ex.getMessage(), request.getRequestURI());
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), "CONFLICT", ex.getMessage(), request.getRequestURI(), null);
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
@@ -95,7 +102,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(TooManyRequestsException.class)
     public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException ex, HttpServletRequest request){
 
-        ErrorResponse error = new ErrorResponse(LocalDateTime.now(), HttpStatus.TOO_MANY_REQUESTS.value(), "TOO_MANY_REQUESTS", ex.getMessage(), request.getRequestURI());
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(), HttpStatus.TOO_MANY_REQUESTS.value(), "TOO_MANY_REQUESTS", ex.getMessage(), request.getRequestURI(), null);
 
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
     }
@@ -110,5 +117,27 @@ public class GlobalExceptionHandler{
     public ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException ex, HttpServletRequest request){
 
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_STORAGE_ERROR", "A file storage error occurred.", request);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request){
+
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+
+        for(FieldError error : ex.getBindingResult().getFieldErrors()){
+            fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value.");
+        }
+
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), "VALIDATION_FAILED",
+                "One or more fields are invalid.", request.getRequestURI(), fieldErrors);
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MissingServletRequestParameterException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ErrorResponse> handleBadRequest(Exception ex, HttpServletRequest request){
+
+        return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "The request contains invalid or missing data.", request);
     }
 }

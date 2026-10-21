@@ -2,9 +2,11 @@ package com.datingapp.backend.websocket;
 
 import org.springframework.stereotype.Component;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class WebSocketRateLimiter{
@@ -12,13 +14,14 @@ public class WebSocketRateLimiter{
     private static final int MAX_MESSAGES = 20;
     private static final long WINDOW_SECONDS = 10;
 
-    private final Map<Long, UserRateLimit> limits = new ConcurrentHashMap<>();
+    private final Cache<Long, UserRateLimit> limits =
+            Caffeine.newBuilder().expireAfterAccess(Duration.ofMinutes(1)).maximumSize(100_000).build();
 
     public boolean isAllowed(Long userId){
 
         Instant now = Instant.now();
 
-        UserRateLimit limit = limits.computeIfAbsent(userId, id -> new UserRateLimit(now, 0));
+        UserRateLimit limit = limits.get(userId, id -> new UserRateLimit(now, 0));
 
         synchronized (limit){
 

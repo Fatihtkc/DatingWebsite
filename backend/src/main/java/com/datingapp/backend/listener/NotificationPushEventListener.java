@@ -14,7 +14,7 @@ public class NotificationPushEventListener {
     private final PushNotificationService pushService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(NotificationPushEvent event) {
+    public void handle(NotificationPushEvent event){
 
         if (event.fcmToken() == null || event.fcmToken().isBlank()){
             return;

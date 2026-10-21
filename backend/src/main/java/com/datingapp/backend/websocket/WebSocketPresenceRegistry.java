@@ -11,21 +11,21 @@ public class WebSocketPresenceRegistry {
 
     private final ConcurrentHashMap<Long, Set<String>> onlineUsers = new ConcurrentHashMap<>();
 
-    public void userConnected(Long userId, String sessionId) {
+    public void userConnected(Long userId, String sessionId){
         onlineUsers.computeIfAbsent(userId, k -> new CopyOnWriteArraySet<>()).add(sessionId);
     }
 
-    public void userDisconnected(Long userId, String sessionId) {
+    public void userDisconnected(Long userId, String sessionId){
         Set<String> sessions = onlineUsers.get(userId);
-        if (sessions != null) {
+        if (sessions != null){
             sessions.remove(sessionId);
-            if (sessions.isEmpty()) {
+            if (sessions.isEmpty()){
                 onlineUsers.remove(userId);
             }
         }
     }
 
-    public boolean isOnline(Long userId) {
+    public boolean isOnline(Long userId){
         return onlineUsers.containsKey(userId);
     }
 }

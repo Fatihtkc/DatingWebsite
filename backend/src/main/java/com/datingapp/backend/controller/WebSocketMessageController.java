@@ -1,9 +1,11 @@
 package com.datingapp.backend.controller;
 
+import java.security.Principal;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 import com.datingapp.backend.dto.Message.SendMessageDTO;
@@ -22,9 +24,11 @@ public class WebSocketMessageController {
     private final MessageService messageService;
 
     @MessageMapping("/sendMessage")
-    public void receiveMessage(@Payload @Valid SendMessageDTO message, @AuthenticationPrincipal CustomUserDetails principal){
+    public void receiveMessage(@Payload @Valid SendMessageDTO message, Principal principal){
         
-        GetMessageDTO saved = messageService.saveMessage(principal, message);
+        CustomUserDetails user = (CustomUserDetails) ((Authentication) principal).getPrincipal();
+
+        GetMessageDTO saved = messageService.saveMessage(user, message);
 
         messagingTemplate.convertAndSend("/topic/conversations/" + saved.getConversationId(),saved);
     }

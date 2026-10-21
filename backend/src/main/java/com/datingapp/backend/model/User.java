@@ -59,8 +59,6 @@ public class User {
 
     private Double height;
 
-    private Double weight;
-
     @Enumerated(EnumType.STRING)
     private BodyType bodyType;
 
@@ -95,7 +93,7 @@ public class User {
     private Alcohol alcohol;
 
     @JdbcTypeCode(SqlTypes.GEOMETRY)
-    @Column(name = "location_point", columnDefinition = "POINT SRID 4326")
+    @Column(name = "location_point", columnDefinition = "POINT SRID 4326",  nullable = false)
     private Point locationPoint;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

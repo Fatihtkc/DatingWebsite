@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.Base64;
 
 @Component
-public class JwtUtil {
+public class JwtUtil{
 
     @Value("${jwt.access-token-ttl}")
     private Duration accessTokenTtl;
@@ -21,12 +21,12 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
     
-    private SecretKey getSigningKey() {
+    private SecretKey getSigningKey(){
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateJwtToken(UserDetails userDetails) {
+    public String generateJwtToken(UserDetails userDetails){
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -37,7 +37,7 @@ public class JwtUtil {
 
     }
 
-    public String getUsernameFromJwtToken(String token) {
+    public String getUsernameFromJwtToken(String token){
 
         return Jwts.parserBuilder()
                    .setSigningKey(getSigningKey())
@@ -48,11 +48,11 @@ public class JwtUtil {
 
     }
 
-    public boolean validateJwtToken(String token) {
-        try {
+    public boolean validateJwtToken(String token){
+        try{
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch(JwtException | IllegalArgumentException e){
             return false;
         }
     }

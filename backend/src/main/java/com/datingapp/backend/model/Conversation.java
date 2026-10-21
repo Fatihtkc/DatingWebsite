@@ -51,9 +51,9 @@ public class Conversation {
 
     private LocalDateTime lastMessageAt;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "user1has_unread", nullable = false)
     private Boolean user1HasUnread = false;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "user2has_unread", nullable = false)
     private Boolean user2HasUnread = false;
 }

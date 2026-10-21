@@ -8,7 +8,9 @@ target/
 # Firebase credentials
 **/src/main/resources/firebase-service-account.json
 **/src/main/resources/*-firebase-adminsdk-*.json
-backend/src/main/resources/soulm-f1f20-firebase-adminsdk-fbsvc-0911288d8e.json
+backend/src/main/resources/firebase-service-account.json
+
+**/src/main/java/com/datingapp/soulm-frontend/node_modules/
 
 **/src/main/resources/application-dev.properties
 

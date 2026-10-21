@@ -39,29 +39,29 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    public String create(String subject) {
+    public String create(String subject){
         return issue(subject, UUID.randomUUID().toString());
     }
 
     @Override
     @Transactional(noRollbackFor = BadCredentialsException.class)
-    public AuthTokens refresh(String rawToken) {
+    public AuthTokens refresh(String rawToken){
 
         RefreshToken stored = repository.findByTokenHash(hash(rawToken))
                 .orElseThrow(() -> new BadCredentialsException("Invalid refresh token"));
 
-        if (stored.isRevoked()) {
+        if(stored.isRevoked()){
             repository.revokeFamily(stored.getFamilyId());
             throw new BadCredentialsException("Refresh token reuse detected");
         }
 
-        if (stored.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if(stored.getExpiryDate().isBefore(LocalDateTime.now())){
             throw new BadCredentialsException("Refresh token expired");
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(stored.getSubject());
 
-        if (!userDetails.isAccountNonLocked()) {
+        if(!userDetails.isAccountNonLocked()){
             repository.revokeFamily(stored.getFamilyId());
             throw new BadCredentialsException("Account is locked");
         }
@@ -78,7 +78,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    public void revoke(String rawToken) {
+    public void revoke(String rawToken){
         repository.findByTokenHash(hash(rawToken)).ifPresent(t -> {repository.revokeFamily(t.getFamilyId());});
     }
 
@@ -113,7 +113,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             return HexFormat.of().formatHex(md.digest(raw.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
+        } catch (Exception e){
             throw new IllegalStateException(e);
         }
     }

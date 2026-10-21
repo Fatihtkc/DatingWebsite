@@ -16,12 +16,14 @@ import com.datingapp.backend.mapper.UserMapper;
 import com.datingapp.backend.model.Manager;
 import com.datingapp.backend.model.Moderator;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.model.UserImage;
 import com.datingapp.backend.repository.ManagerRepository;
 import com.datingapp.backend.repository.ModeratorRepository;
 import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.FileStorageService;
 import com.datingapp.backend.service.FileUploadResult;
 import com.datingapp.backend.service.ManagerService;
+import com.datingapp.backend.service.UserImageService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -47,6 +51,7 @@ public class ManagerServiceImpl implements ManagerService {
     private final ManagerMapper managerMapper;
     private final UserMapper userMapper;
     private final FileStorageService storage;
+    private final UserImageService userImageService;
 
     @Override
     public ModeratorUpdateDTO hireModerator(ModeratorCreateDTO dto, MultipartFile file){
@@ -148,7 +153,7 @@ public class ManagerServiceImpl implements ManagerService {
     public void updatePasswordManager(Long authenticatedUserId,PasswordChangeRequestDTO request){
 
         Optional<Manager> optionalManager = managerRepo.findById(authenticatedUserId);
-        if (optionalManager.isEmpty()) {
+        if (optionalManager.isEmpty()){
             throw new ResourceNotFoundException("Manager not found");
         }
 
@@ -243,7 +248,11 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public Page<UserAdminDTO> searchUsersByName(String name, Pageable pageable){
-        return userRepo.searchByFullName(name, pageable).map(userMapper::toAdminDTO);
+        Page<User> users = userRepo.searchByFullName(name, pageable);
+
+        Map<Long, List<UserImage>> imagesByUserId = userImageService.loadApprovedImages(users.getContent());
+
+        return users.map(user -> userMapper.toAdminDTO(user, imagesByUserId.getOrDefault(user.getId(), List.of())));
     }
 
     @Override

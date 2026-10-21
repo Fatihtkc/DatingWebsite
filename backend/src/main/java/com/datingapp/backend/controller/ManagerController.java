@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class ManagerController {
 
@@ -39,8 +39,7 @@ public class ManagerController {
 
     @GetMapping("/moderator/{id}")
     @PreAuthorize("hasRole('MANAGER') or hasRole('MODERATOR')")
-    public ResponseEntity<ModeratorUpdateDTO> getModeratorById(@PathVariable Long id) {
-
+    public ResponseEntity<ModeratorUpdateDTO> getModeratorById(@PathVariable Long id){
         return ResponseEntity.ok(managerService.getModeratorById(id));
     }
 
@@ -55,14 +54,14 @@ public class ManagerController {
     @PutMapping(value = "/moderators/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ModeratorUpdateDTO> updateModerator(@PathVariable Long id, @RequestPart("data") @Valid ModeratorUpdateDTO dto,
-            @RequestPart(value = "image", required = false) MultipartFile file) {
+            @RequestPart(value = "image", required = false) MultipartFile file){
 
         return ResponseEntity.ok(managerService.updateModerator(id, dto, file));
     }
 
     @PutMapping("/moderator/change-password")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changePasswordModerator(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody PasswordChangeRequestDTO request){
+    @PreAuthorize("isAuthenticated() and (hasRole('MANAGER') or hasRole('MODERATOR'))")
+    public ResponseEntity<?> changePasswordModerator(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid PasswordChangeRequestDTO request){
 
         managerService.updatePasswordModerator(principal.getId(), request);
 
@@ -71,7 +70,7 @@ public class ManagerController {
 
     @DeleteMapping("/moderators/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<Void> fireModerator(@PathVariable Long id) {
+    public ResponseEntity<Void> fireModerator(@PathVariable Long id){
 
         managerService.fireModerator(id);
 
@@ -93,7 +92,7 @@ public class ManagerController {
     }
 
     @PutMapping("/manager/change-password")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and (hasRole('MANAGER') or hasRole('MODERATOR'))")
     public ResponseEntity<?> changePasswordManager(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid PasswordChangeRequestDTO request){
 
         managerService.updatePasswordManager(principal.getId(), request);
@@ -134,7 +133,7 @@ public class ManagerController {
 
     @PutMapping("/users/{id}")
     @PreAuthorize("hasRole('MANAGER') or hasRole('MODERATOR')")
-    public ResponseEntity<UserAdminDTO> updateUserInfo(@PathVariable Long id, @RequestBody UserAdminDTO user){
+    public ResponseEntity<UserAdminDTO> updateUserInfo(@PathVariable Long id, @RequestBody @Valid UserAdminDTO user){
 
         return ResponseEntity.ok(managerService.updateUserInfo(id, user));
         

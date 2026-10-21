@@ -6,9 +6,9 @@ import com.datingapp.backend.dto.Message.ConversationDTO;
 import com.datingapp.backend.model.Conversation;
 
 @Component
-public class ConversationMapper {
+public class ConversationMapper{
 
-    public ConversationDTO toDTO(Conversation conversation) {
+    public ConversationDTO toDTO(Conversation conversation){
 
         ConversationDTO dto = new ConversationDTO();
 

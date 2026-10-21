@@ -15,18 +15,15 @@ import java.io.InputStream;
 public class FirebaseConfig {
 
     @PostConstruct
-    public void initialize() {
-        try (InputStream serviceAccount =
-                 new ClassPathResource("firebase-service-account.json").getInputStream()) {
+    public void initialize(){
+        try(InputStream serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream()){
 
-            FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .build();
+            FirebaseOptions options = FirebaseOptions.builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build();
 
-            if (FirebaseApp.getApps().isEmpty()) {
+            if(FirebaseApp.getApps().isEmpty()){
                 FirebaseApp.initializeApp(options);
             }
-        } catch (IOException e) {
+        } catch(IOException e){
             throw new FirebaseInitializationException("Firebase could not be initialized.", e);
         }
     }

@@ -8,7 +8,7 @@ import com.datingapp.backend.repository.OtpRepository;
 import com.datingapp.backend.service.OtpHashService;
 import com.datingapp.backend.service.OtpService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.security.SecureRandom;
@@ -38,18 +38,20 @@ public class OtpServiceImpl implements OtpService {
     }
     
     @Override
+    @Transactional
     public boolean verifyOtp(String email, String otp){
-        Otp storedOtp = otpRepository.findByEmailAndPurpose(email, OtpPurpose.EMAIL_VERIFICATION).orElse(null);
+        Otp storedOtp = otpRepository.findByEmailAndPurposeForUpdate(email, OtpPurpose.EMAIL_VERIFICATION).orElse(null);
 
-        if (storedOtp == null){
+        if(storedOtp == null){
             return false;
         }
 
-        if (!storedOtp.getExpiry().isAfter(LocalDateTime.now())) {
+        if(!storedOtp.getExpiry().isAfter(LocalDateTime.now())){
+            otpRepository.delete(storedOtp);
             return false;
         }
 
-        if (storedOtp.getAttempts() >= MAX_ATTEMPTS) {
+        if(storedOtp.getAttempts() >= MAX_ATTEMPTS){
             otpRepository.delete(storedOtp);
             return false;
         }
@@ -58,10 +60,8 @@ public class OtpServiceImpl implements OtpService {
 
         String codeHash = otpHashService.hash(email, otp, OtpPurpose.EMAIL_VERIFICATION.name());
 
-        if (!codeHash.equals(storedOtp.getCode())){
-
+        if(!codeHash.equals(storedOtp.getCode())){
             otpRepository.save(storedOtp);
-
             return false;
         }
 
@@ -72,7 +72,7 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     @Transactional
-    public void clearOtp(String email) {
+    public void clearOtp(String email){
         otpRepository.deleteByEmailAndPurpose(email, OtpPurpose.EMAIL_VERIFICATION);
     }
 }

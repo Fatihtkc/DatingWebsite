@@ -28,14 +28,14 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/profile")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails principal){
 
         return ResponseEntity.ok(userService.getUserById(principal.getId()));
     }
 
     @GetMapping("/allprofiles")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('MODERATOR')")
     public ResponseEntity<Page<UserProfileDTO>> getAllUsers(@PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(userService.getAllUsers(pageable));
@@ -55,7 +55,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id, principal.getId()));
     }
 
-    @GetMapping("/{email}")
+    @GetMapping("/by-email/{email}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileDTO> getByEmail(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable String email){
 
@@ -76,13 +76,13 @@ public class UserController {
     }
 
     @PutMapping("/profile/{id}")
-    @PreAuthorize("#id == principal.id")
-    public ResponseEntity<UserProfileDTO> update(@PathVariable Long id, @RequestBody @Valid UserUpdateDTO user) {
+    @PreAuthorize("#id == principal.id and hasRole('USER')")
+    public ResponseEntity<UserProfileDTO> update(@PathVariable Long id, @RequestBody @Valid UserUpdateDTO user){
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("#id == principal.id or hasRole('MODERATOR')")
+    @PreAuthorize("#id == principal.id and hasRole('USER')")
     public ResponseEntity<Void> delete(@PathVariable Long id){
 
         userService.deleteUser(id);
@@ -92,7 +92,7 @@ public class UserController {
     }
     
     @GetMapping("/nearby")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Page<NearbyUserDTO>> getNearbyUsers(
         @AuthenticationPrincipal CustomUserDetails principal, 
         @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") double lat,

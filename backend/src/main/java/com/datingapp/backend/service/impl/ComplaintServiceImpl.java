@@ -13,7 +13,7 @@ import com.datingapp.backend.repository.UserRepository;
 import com.datingapp.backend.service.ComplaintService;
 import com.datingapp.backend.service.FileUploadResult;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -44,7 +44,7 @@ public class ComplaintServiceImpl implements ComplaintService{
 
         ComplaintProjection projection = complaintRepository.findComplaintProjectionById(id);
 
-        if (projection == null){
+        if(projection == null){
             throw new ResourceNotFoundException("Complaint not found with id: " + id);
         }
 
@@ -65,9 +65,9 @@ public class ComplaintServiceImpl implements ComplaintService{
         complaint.setReason(dto.getReason());
         complaint.setComplaintDate(LocalDateTime.now());
 
-        if (files != null && !files.isEmpty()){
+        if(files != null && !files.isEmpty()){
 
-            for (MultipartFile file : files) {
+            for (MultipartFile file : files){
 
                 FileUploadResult result = storage.storeFile(file);
                 ComplaintImage image = new ComplaintImage();
@@ -87,7 +87,7 @@ public class ComplaintServiceImpl implements ComplaintService{
     @Transactional 
     public void deleteComplaint(Long id){
 
-        if (!complaintRepository.existsById(id)) {
+        if(!complaintRepository.existsById(id)){
             throw new ResourceNotFoundException("Complaint not found with id: " + id);
         }
         complaintRepository.deleteById(id);

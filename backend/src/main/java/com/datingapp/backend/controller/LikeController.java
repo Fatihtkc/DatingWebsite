@@ -25,25 +25,24 @@ public class LikeController {
     private final LikeService likeService;
     private final UserLikeMapper userLikeMapper;
 
-    @GetMapping("/{userId}")
-    @PreAuthorize("#userId == principal.id")
+    @GetMapping("/mylikes")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<UserLikeDTO>> listLikes(@AuthenticationPrincipal CustomUserDetails principal, @PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(likeService.getLikesByLiker(principal.getId(), pageable));
     }
 
     @PostMapping("/users/{likedId}/like")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserLikeDTO> Createlike(@PathVariable Long likedId, @AuthenticationPrincipal CustomUserDetails principal){
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
+    public ResponseEntity<UserLikeDTO> createLike(@PathVariable Long likedId, @AuthenticationPrincipal CustomUserDetails principal){
 
         UserLike newLike = likeService.addLike(principal.getId(), likedId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userLikeMapper.toDTO(newLike));
     }
 
-
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails principal){
 
         likeService.removeLike(id, principal.getId());

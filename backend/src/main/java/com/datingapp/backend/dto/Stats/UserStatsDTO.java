@@ -19,5 +19,4 @@ public class UserStatsDTO {
 
     private List<RelationshipDistributionDTO> relationshipTypes;
 
-    private AverageHeightWeightDTO averageHeightWeight;
 }

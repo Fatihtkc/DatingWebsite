@@ -25,7 +25,7 @@ public class NotificationController {
 
 
     @PutMapping("/fcm-token")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Void> updateFcmToken(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid FcmTokenUpdateDTO dto){
 
         notificationService.updateFcmToken(principal.getId(), dto.getToken());
@@ -35,7 +35,7 @@ public class NotificationController {
 
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Page<NotificationDTO>> getNotifications(@AuthenticationPrincipal CustomUserDetails principal, Pageable pageable){
 
         return ResponseEntity.ok(notificationService.getNotifications(principal.getId(),pageable));
@@ -43,7 +43,7 @@ public class NotificationController {
 
 
     @GetMapping("/unread-count")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Long> getUnreadCount(@AuthenticationPrincipal CustomUserDetails principal){
 
         return ResponseEntity.ok(notificationService.getUnreadCount(principal.getId()));
@@ -51,7 +51,7 @@ public class NotificationController {
 
 
     @PutMapping("/mark-all-read")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Void> markAllRead(@AuthenticationPrincipal CustomUserDetails principal){
 
         notificationService.markAllAsRead(principal.getId());
@@ -61,8 +61,8 @@ public class NotificationController {
 
 
     @PutMapping("/settings")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> updateSettings(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody NotificationSettingsDTO dto){
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
+    public ResponseEntity<Void> updateSettings(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody @Valid NotificationSettingsDTO dto){
 
         notificationService.updateSettings(principal.getId(),dto);
 

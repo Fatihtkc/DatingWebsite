@@ -2,12 +2,12 @@ package com.datingapp.backend.service.impl;
 
 import com.datingapp.backend.dto.Message.GetMessageDTO;
 import com.datingapp.backend.dto.Message.SendMessageDTO;
-import com.datingapp.backend.enums.NotificationType;
 import com.datingapp.backend.exception.UserNotFoundException;
 import com.datingapp.backend.mapper.MessageMapper;
 import com.datingapp.backend.model.Conversation;
 import com.datingapp.backend.model.Message;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.records.MessageSavedEvent;
 import com.datingapp.backend.repository.ConversationRepository;
 import com.datingapp.backend.repository.MessageRepository;
 import com.datingapp.backend.repository.UserRepository;
@@ -17,13 +17,13 @@ import com.datingapp.backend.service.MatchService;
 import com.datingapp.backend.service.UserBlockService;
 import com.datingapp.backend.websocket.WebSocketPresenceRegistry;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.datingapp.backend.service.MessageService;
-import com.datingapp.backend.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -42,32 +42,37 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationService conversationService;
     private final UserBlockService userBlockService;
     private final MessageMapper messageMapper;
-    private final NotificationService notificationService;
     private final WebSocketPresenceRegistry presenceRegistry;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Override
     @Transactional 
-    public GetMessageDTO saveMessage(CustomUserDetails principal, SendMessageDTO dto) {
+    public GetMessageDTO saveMessage(CustomUserDetails principal, SendMessageDTO dto){
 
         Long senderId = principal.getId();
 
         User sender = userRepository.findById(senderId).orElseThrow(() -> new UserNotFoundException(senderId));
 
+        if(sender.isBanned()){
+            throw new AccessDeniedException("Account is banned.");
+        }
+
         Conversation conversation = conversationService.getConversationForUser(dto.getConversationId(), senderId);
 
         Long otherUserId;
 
-        if (conversation.getUser1().getId().equals(senderId)){
+        if(conversation.getUser1().getId().equals(senderId)){
             otherUserId = conversation.getUser2().getId();
-        } else {
+        }else{
             otherUserId = conversation.getUser1().getId();
         }
 
-        if (userBlockService.isBlockedBetween(senderId, otherUserId)){
+        if(userBlockService.isBlockedBetween(senderId, otherUserId)){
             throw new AccessDeniedException("You cannot send messages to this user.");
         }
 
-        if (!matchService.isMatched(senderId, otherUserId)){
+        if(!matchService.isMatched(senderId, otherUserId)){
             throw new IllegalArgumentException("Users are not matched");
         }
 
@@ -87,23 +92,21 @@ public class MessageServiceImpl implements MessageService {
 
         boolean receiverOnline = presenceRegistry.isOnline(otherUserId);
 
-        User receiverUser = userRepository.findById(otherUserId).orElseThrow(() -> new UserNotFoundException(otherUserId));
+        String preview = Boolean.TRUE.equals(saved.getIsImage()) ? "Sent a photo" : saved.getContent();
 
-        notificationService.notify(receiverUser, NotificationType.NEW_MESSAGE, saved.getId(), sender.getFirstName() + " " + sender.getLastName(), 
-            Boolean.TRUE.equals(saved.getIsImage()) ? "Sent a photo" : saved.getContent(), !receiverOnline);
+        eventPublisher.publishEvent(new MessageSavedEvent(otherUserId, saved.getId(),
+            sender.getFirstName() + " " + sender.getLastName(), preview, !receiverOnline));
 
         return messageMapper.toDTO(saved);
     }
 
     @Override
-    public Page<GetMessageDTO> getChatMessages(CustomUserDetails principal, Long conversationId, Pageable pageable) {
+    public Page<GetMessageDTO> getChatMessages(CustomUserDetails principal, Long conversationId, Pageable pageable){
 
         Long userId = principal.getId();
 
         conversationService.getConversationForUser(conversationId, userId);
 
-        return messageRepository
-                .findByConversationIdOrderBySentAtDesc(conversationId, pageable)
-                .map(messageMapper::toDTO);
+        return messageRepository.findByConversationIdOrderBySentAtDesc(conversationId, pageable).map(messageMapper::toDTO);
     }
 }

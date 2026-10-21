@@ -15,6 +15,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -51,16 +52,12 @@ public class UserCreateDTO{
     @Past
     private LocalDate birthDate;
 
-    @NotBlank
+    @NotNull
     private Gender gender;
 
     @DecimalMin(value = "50.0")
     @DecimalMax(value = "250.0")
     private Double height;
-
-    @DecimalMin(value = "20.0")
-    @DecimalMax(value = "300.0")
-    private Double weight;
 
     @Size(max = 500)
     private String location;
@@ -77,11 +74,8 @@ public class UserCreateDTO{
     @Size(max = 500)
     private String weekendPlans;
 
-    @Size(max = 500)
     private BodyType bodyType;
 
-    @NotBlank
-    @Size(max = 500)
     private RelationshipType relationshipType;
 
     @Size(max = 500)
@@ -90,12 +84,19 @@ public class UserCreateDTO{
     @Size(max = 500)
     private String distancePreference;
 
-    @Size(max = 500)
     private Smoking smoke;
 
-    @Size(max = 500)
     private Alcohol alcohol;
 
-    @Size(max = 500)
     private Diet diet;
+
+    @NotNull
+    @DecimalMin("-90.0")
+    @DecimalMax("90.0")
+    private Double latitude;
+
+    @NotNull
+    @DecimalMin("-180.0")
+    @DecimalMax("180.0")
+    private Double longitude;
 }

@@ -21,10 +21,9 @@ public class EmailServiceImpl implements EmailService {
     private String frontendUrl;
 
     @Override
-    public void sendTokenEmail(String to, String token, Token.TokenType type) {
+    public void sendTokenEmail(String to, String token, Token.TokenType type){
 
         String resetLink = UriComponentsBuilder.fromUriString(frontendUrl).path("/reset-password").queryParam("token", token).build().encode().toUriString(); 
-
         String body = "Click on this link to complete the process:\n\n" + resetLink;
 
         SimpleMailMessage message = new SimpleMailMessage();
@@ -36,7 +35,7 @@ public class EmailServiceImpl implements EmailService {
         mailSender.send(message);
     }
 
-    public void sendOtpEmail(String toEmail, String otp) {
+    public void sendOtpEmail(String toEmail, String otp){
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Your OTP Code");

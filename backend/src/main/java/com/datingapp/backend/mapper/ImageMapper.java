@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ImageMapper {
+public class ImageMapper{
 
-    public UserImage toUserImageEntity(ImageDTO dto) {
+    public UserImage toUserImageEntity(ImageDTO dto){
         UserImage image = new UserImage();
 
         image.setId(dto.getId());
@@ -23,7 +23,7 @@ public class ImageMapper {
         return image;
     }
 
-    public ComplaintImage toComplaintImageEntity(ImageDTO dto) {
+    public ComplaintImage toComplaintImageEntity(ImageDTO dto){
         ComplaintImage image = new ComplaintImage();
 
         image.setId(dto.getId());
@@ -32,7 +32,7 @@ public class ImageMapper {
         return image;
     }
 
-    public ImageDTO toDTO(UserImage image) {
+    public ImageDTO toDTO(UserImage image){
         ImageDTO dto = new ImageDTO();
 
         dto.setId(image.getId());
@@ -41,7 +41,7 @@ public class ImageMapper {
         return dto;
     }
 
-    public ImageDTO toDTO(ComplaintImage image) {
+    public ImageDTO toDTO(ComplaintImage image){
         ImageDTO dto = new ImageDTO();
 
         dto.setId(image.getId());

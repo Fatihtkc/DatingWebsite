@@ -9,7 +9,6 @@ public record RateLimitRule(
     Predicate<HttpServletRequest> matcher, 
     int capacity,                          
     Duration window,                       
-    KeyStrategy keyStrategy                
-) {
+    KeyStrategy keyStrategy){
     public enum KeyStrategy { IP, USER, EMAIL }
 }

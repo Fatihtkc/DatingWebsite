@@ -1,7 +1,6 @@
 package com.datingapp.backend.controller;
 
 import com.datingapp.backend.dto.Match.MatchDTO;
-import com.datingapp.backend.model.Match;
 import com.datingapp.backend.security.CustomUserDetails;
 import com.datingapp.backend.service.MatchService;
 
@@ -23,28 +22,28 @@ public class MatchController {
     private final MatchService matchService;
 
     @GetMapping
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Page<MatchDTO>> getMyMatches(@AuthenticationPrincipal CustomUserDetails principal, @PageableDefault(page = 0, size = 20) Pageable pageable){
 
         return ResponseEntity.ok(matchService.getMatchesForUser(principal.getId(), pageable));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public Match createMatch(@AuthenticationPrincipal CustomUserDetails principal, @RequestParam Long user2Id){
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
+    public MatchDTO createMatch(@AuthenticationPrincipal CustomUserDetails principal, @RequestParam Long user2Id){
 
         return matchService.createMatch(principal.getId(), user2Id);
     }
 
     @GetMapping("/with/{otherUserId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Boolean> IsMatched(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long otherUserId){
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
+    public ResponseEntity<Boolean> isMatched(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long otherUserId){
 
         return ResponseEntity.ok(matchService.isMatched(principal.getId(), otherUserId));
     }
 
     @DeleteMapping("/{matchId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Void> deleteMatch(@PathVariable Long matchId, @AuthenticationPrincipal CustomUserDetails principal){
 
         matchService.deleteMatch(matchId, principal.getId());

@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -36,27 +37,28 @@ public class LoginServiceImpl implements LoginService {
     private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
 
-    private record LoginUser(Long id, String username, String password, Role role, boolean banned) {}
+    private record LoginUser(Long id, String username, String password, Role role, boolean banned){}
 
     @Override
     public JwtResponseDTO login(LoginRequestDTO loginRequest, String ip){
 
         String email = loginRequest.getEmail();
 
-        if (loginAttemptService.isLocked(email, ip)) {
+        if(loginAttemptService.isLocked(email, ip)){
             throw new TooManyLoginAttemptsException("Too many failed attempts. Please try again later.");
         }
 
         LoginUser loginUser = findLoginUser(email);
 
-        if (!passwordUtil.checkPassword(
-                loginRequest.getPassword(),
-                loginUser.password())) {
+        if(!passwordUtil.checkPassword(loginRequest.getPassword(), loginUser.password())){
 
             loginAttemptService.recordAttempt(email, ip, false);
 
             throw new BadCredentialsException("Invalid email or password");
         }
+
+        if(loginUser.banned())
+            throw new AccessDeniedException("Account is banned.");
 
         loginAttemptService.recordAttempt(email, ip, true);
 
@@ -71,38 +73,28 @@ public class LoginServiceImpl implements LoginService {
     private LoginUser findLoginUser(String email){
 
         return userRepository.findByEmail(email)
-                .map(user -> new LoginUser(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getPassword(),
-                        Role.USER,
-                        user.isBanned()
-                ))
-                .orElseGet(() ->
-                        moderatorRepository.findByEmail(email)
+                .map(user -> new LoginUser(user.getId(), user.getUsername(), user.getPassword(), Role.USER, user.isBanned()))
+                .orElseGet(() -> moderatorRepository.findByEmail(email)
                                 .map(moderator -> new LoginUser(
                                         moderator.getId(),
                                         moderator.getEmail(),
                                         moderator.getPassword(),
                                         Role.MODERATOR,
                                         false
-                                ))
-                                .orElseGet(() ->
-                                        managerRepository.findByEmail(email)
+                                )).orElseGet(() -> managerRepository.findByEmail(email)
                                                 .map(manager -> new LoginUser(
                                                         manager.getId(),
                                                         manager.getEmail(),
                                                         manager.getPassword(),
                                                         Role.MANAGER,
                                                         false
-                                                ))
-                                                .orElseThrow(() ->new BadCredentialsException("Invalid email or password")
+                                                )).orElseThrow(() ->new BadCredentialsException("Invalid email or password")
                                 )
                 ));
     }
 
     @Override
-    public User registerUser(String email, String rawPassword) {
+    public User registerUser(String email, String rawPassword){
         String encodedPassword = passwordUtil.encodePassword(rawPassword);
         User user = new User();
         user.setEmail(email);
@@ -111,22 +103,22 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public Optional<User> findUserByEmail(String email) {
+    public Optional<User> findUserByEmail(String email){
         return userRepository.findByEmail(email);
     }
     
     @Override
-    public Optional<Moderator> findModeratorByEmail(String email) {
+    public Optional<Moderator> findModeratorByEmail(String email){
         return moderatorRepository.findByEmail(email);
     }
     
     @Override
-    public Optional<Manager> findManagerByEmail(String email) {
+    public Optional<Manager> findManagerByEmail(String email){
         return managerRepository.findByEmail(email);
     }
 
     @Override
-    public boolean validatePassword(String rawPassword, String storedPassword) {
+    public boolean validatePassword(String rawPassword, String storedPassword){
         return passwordUtil.checkPassword(rawPassword, storedPassword);
     }
 

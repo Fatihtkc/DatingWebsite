@@ -9,11 +9,11 @@ import com.datingapp.backend.enums.NotificationType;
 @Data
 @NoArgsConstructor
 public class NotificationDTO {
-    private Long Id;
-    private NotificationType Type;
-    private String Title;
-    private String Body;
-    private Long RelatedEntityId;
+    private Long id;
+    private NotificationType type;
+    private String title;
+    private String body;
+    private Long relatedEntityId;
     private boolean isRead;
     private LocalDateTime createdAt;
 }

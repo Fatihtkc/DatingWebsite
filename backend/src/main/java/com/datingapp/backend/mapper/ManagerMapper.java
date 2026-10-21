@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ManagerMapper {
 
-    public ManagerUpdateDTO toDTO(Manager manager) {
+    public ManagerUpdateDTO toDTO(Manager manager){
         ManagerUpdateDTO dto = new ManagerUpdateDTO();
 
         dto.setId(manager.getId());

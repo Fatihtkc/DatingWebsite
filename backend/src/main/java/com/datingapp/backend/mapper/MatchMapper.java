@@ -1,10 +1,14 @@
 package com.datingapp.backend.mapper;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import com.datingapp.backend.dto.Match.MatchDTO;
 import com.datingapp.backend.model.Match;
 import com.datingapp.backend.model.User;
+import com.datingapp.backend.model.UserImage;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +25,18 @@ public class MatchMapper {
         MatchDTO dto = new MatchDTO();
         dto.setId(match.getId());
         dto.setUser(userMapper.toDTO(otherUser));
+        dto.setMatchedAt(match.getMatchedAt());
+
+        return dto;
+    }
+
+    public MatchDTO toDTO(Match match, Long currentUserId, Map<Long, List<UserImage>> imagesByUserId){
+
+        User otherUser = match.getUser1().getId().equals(currentUserId) ? match.getUser2() : match.getUser1();
+
+        MatchDTO dto = new MatchDTO();
+        dto.setId(match.getId());
+        dto.setUser(userMapper.toDTO(otherUser, imagesByUserId.getOrDefault(otherUser.getId(), List.of())));
         dto.setMatchedAt(match.getMatchedAt());
 
         return dto;

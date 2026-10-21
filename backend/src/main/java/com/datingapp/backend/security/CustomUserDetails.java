@@ -23,7 +23,7 @@ public class CustomUserDetails implements UserDetails {
     private final boolean banned;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities(){
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
@@ -45,7 +45,7 @@ public class CustomUserDetails implements UserDetails {
         return true;
     }
     @Override
-    public boolean isAccountNonLocked() {
+    public boolean isAccountNonLocked(){
         return !banned;
     }
 }

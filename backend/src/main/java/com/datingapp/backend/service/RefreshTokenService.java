@@ -7,6 +7,5 @@ public interface RefreshTokenService {
     void revoke(String rawRefreshToken);           
     void revokeAll(String subject);               
 
-    record AuthTokens(Long id, String username, String accessToken,
-                      String refreshToken, com.datingapp.backend.enums.Role role) {}
+    record AuthTokens(Long id, String username, String accessToken, String refreshToken, com.datingapp.backend.enums.Role role){}
 }

@@ -14,14 +14,13 @@ public class UserStatsServiceImpl implements UserStatsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserStatsDTO getStats() {
+    public UserStatsDTO getStats(){
 
         return new UserStatsDTO(
             userRepository.countAllUsers(),
             userRepository.averageAge(),
             userRepository.genderDistribution(),
-            userRepository.relationshipTypes(),
-            userRepository.averageHeightWeight()
+            userRepository.relationshipTypes()
         );
     }
 }

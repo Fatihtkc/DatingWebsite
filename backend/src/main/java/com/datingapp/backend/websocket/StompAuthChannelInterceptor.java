@@ -16,6 +16,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,8 +38,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel){
 
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
+         if(accessor == null){
+            throw new AccessDeniedException("Invalid STOMP message.");
+        }
         StompCommand command = accessor.getCommand();
 
         if (StompCommand.CONNECT.equals(command)){
@@ -72,6 +77,9 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         String username = jwtUtil.getUsernameFromJwtToken(token);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if(!userDetails.isAccountNonLocked()){
+            throw new IllegalArgumentException("Account is locked.");
+        }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken( userDetails, null, userDetails.getAuthorities());
 
@@ -80,19 +88,19 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private void authorizeSubscription(StompHeaderAccessor accessor){
 
-        if (accessor.getUser() == null){
-            throw new IllegalArgumentException("Authentication required.");
+        if(accessor.getUser() == null){
+            throw new AccessDeniedException("Authentication required.");
         }
 
         String destination = accessor.getDestination();
 
-        if (destination == null){
+        if(destination == null){
             throw new IllegalArgumentException("Subscription destination is required.");
         }
 
         Matcher matcher = CONVERSATION_TOPIC.matcher(destination);
 
-        if (!matcher.matches()){
+        if(!matcher.matches()){
             throw new IllegalArgumentException("Invalid subscription destination.");
         }
 
@@ -104,7 +112,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
         boolean isMember = conversationRepository.existsByIdAndUserId(conversationId, principal.getId());
 
-        if (!isMember){
+        if(!isMember){
             throw new IllegalArgumentException("You are not a member of this conversation.");
         }
     }

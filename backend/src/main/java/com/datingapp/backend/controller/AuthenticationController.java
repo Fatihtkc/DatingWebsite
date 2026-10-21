@@ -34,24 +34,17 @@ public class AuthenticationController{
 
     private String resolveIp(HttpServletRequest request){
         
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-
-        if (forwardedFor != null && !forwardedFor.isBlank()){
-            return forwardedFor.split(",")[0].trim();
-        }
-
         return request.getRemoteAddr();
     }
 
      @PostMapping("/refresh")
-    public ResponseEntity<JwtResponseDTO> refresh(@Valid @RequestBody RefreshRequestDTO req) {
+    public ResponseEntity<JwtResponseDTO> refresh(@Valid @RequestBody RefreshRequestDTO req){
         var t = refreshTokenService.refresh(req.getRefreshToken());
-        return ResponseEntity.ok(new JwtResponseDTO(
-                t.id(), t.username(), t.accessToken(), t.refreshToken(), t.role()));
+        return ResponseEntity.ok(new JwtResponseDTO(t.id(), t.username(), t.accessToken(), t.refreshToken(), t.role()));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequestDTO req) {
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequestDTO req){
         refreshTokenService.revoke(req.getRefreshToken());
         return ResponseEntity.noContent().build();
     }

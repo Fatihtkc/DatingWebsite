@@ -41,7 +41,7 @@ public class SecurityConfig {
     private boolean requireSsl;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
@@ -72,16 +72,13 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/auth/login",
-                    "/signup",
-                    "/check-user",
-                    "/api/auth/refresh",
-                    "/api/auth/logout"
+                    "/api/users/signup",
+                    "/api/users/check-user"
                 ).permitAll()
-                .requestMatchers("/api/token/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/token/**").permitAll()
+                .requestMatchers("/chat/**").permitAll()
+                .anyRequest().authenticated()
             )
 
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

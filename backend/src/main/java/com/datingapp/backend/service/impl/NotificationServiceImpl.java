@@ -40,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Optional<NotificationSettings> settingsOpt = settingsRepository.findByUserId(recipient.getId());
 
-        if (settingsOpt.isPresent() && !isEnabled(settingsOpt.get(), type)) {
+        if (settingsOpt.isPresent() && !isEnabled(settingsOpt.get(), type)){
             return;
         }
 
@@ -128,8 +128,8 @@ public class NotificationServiceImpl implements NotificationService {
             });
     }
 
-    private boolean isEnabled(NotificationSettings settings, NotificationType type) {
-        return switch (type) {
+    private boolean isEnabled(NotificationSettings settings, NotificationType type){
+        return switch (type){
             case NEW_MATCH -> settings.isMatchNotificationsEnabled();
             case NEW_MESSAGE -> settings.isMessageNotificationsEnabled();
             case NEW_LIKE -> settings.isLikeNotificationsEnabled();

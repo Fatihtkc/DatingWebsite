@@ -22,7 +22,7 @@ public class MessageController {
     private final MessageService messageService;
 
     @GetMapping("/{conversationId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasRole('USER')")
     public ResponseEntity<Page<GetMessageDTO>> getChatMessages(@AuthenticationPrincipal CustomUserDetails principal, @PathVariable Long conversationId, 
             @PageableDefault(page = 0, size = 20) Pageable pageable){
 
