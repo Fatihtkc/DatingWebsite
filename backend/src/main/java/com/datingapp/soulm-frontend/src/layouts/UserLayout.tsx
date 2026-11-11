@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/common/Button';
 import { Logo } from '@/components/common/Logo';
 import { ChatProvider } from '@/features/chat/ChatProvider';
+import { NotificationBell } from '@/features/notifications/NotificationBell';
 import { useAuth } from '@/features/auth/useAuth';
 import { APP_ROUTES, ROUTES } from '@/routes';
 import { cx } from '@/utils/cx';
@@ -11,6 +12,8 @@ const NAV = [
   { to: APP_ROUTES.likes, label: 'Likes' },
   { to: APP_ROUTES.matches, label: 'Matches' },
   { to: APP_ROUTES.conversations, label: 'Messages' },
+  { to: APP_ROUTES.profile, label: 'Profile' },
+  { to: APP_ROUTES.settings, label: 'Settings' },
 ] as const;
 
 /** Chrome for the signed-in member area. */
@@ -35,6 +38,7 @@ export function UserLayout() {
               </NavLink>
             ))}
           </nav>
+          <NotificationBell />
           <Button
             variant="ghost"
             onClick={() => {

@@ -51,3 +51,30 @@ export interface UserProfile {
   weekendPlans: string | null;
   images: ImageDto[] | null;
 }
+
+/**
+ * Body of PUT /api/users/profile/{id} (UserUpdateDTO). The server OVERWRITES every field with what is
+ * sent, so anything left out becomes null. `latitude` and `longitude` are @NotNull. `username` is in the
+ * DTO but ignored by the service, so it is not sent.
+ */
+export interface UserUpdateRequest {
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  birthDate?: string | undefined;
+  gender?: Gender | undefined;
+  height?: number | undefined;
+  bodyType?: BodyType | undefined;
+  location?: string | undefined;
+  relationshipType?: RelationshipType | undefined;
+  agePreference?: string | undefined;
+  distancePreference?: string | undefined;
+  smoke?: Smoking | undefined;
+  alcohol?: Alcohol | undefined;
+  diet?: Diet | undefined;
+  shorterBio?: string | undefined;
+  hobbies?: string | undefined;
+  favoriteMusic?: string | undefined;
+  weekendPlans?: string | undefined;
+  latitude: number;
+  longitude: number;
+}

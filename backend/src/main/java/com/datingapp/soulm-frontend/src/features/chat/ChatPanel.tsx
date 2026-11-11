@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, toUserMessage } from '@/api/errors';
 import { getUserProfile } from '@/api/userApi';
 import { Alert } from '@/components/common/Alert';
 import { Button } from '@/components/common/Button';
 import { ProfileImage } from '@/components/common/ProfileImage';
 import { EmptyState, LoadingState } from '@/components/common/StateViews';
+import { BlockDialog } from '@/components/dating/BlockDialog';
 import { ReportDialog } from '@/components/dating/ReportDialog';
 import { useAuth } from '@/features/auth/useAuth';
 import { approvedImages } from '@/features/media/images';
@@ -62,6 +63,8 @@ export function ChatPanel({ otherUserId }: { otherUserId: number }) {
   const [draft, setDraft] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [reporting, setReporting] = useState(false);
+  const [blocking, setBlocking] = useState(false);
+  const navigate = useNavigate();
   const counter = useRef(0);
 
   const historyMessages = useMemo(() => history.data?.pages.flatMap((page) => page.content) ?? [], [history.data]);
@@ -193,6 +196,9 @@ export function ChatPanel({ otherUserId }: { otherUserId: number }) {
         <Button variant="ghost" onClick={() => setReporting(true)}>
           Report
         </Button>
+        <Button variant="ghost" onClick={() => setBlocking(true)}>
+          Block
+        </Button>
       </header>
 
       {offline && (
@@ -270,6 +276,13 @@ export function ChatPanel({ otherUserId }: { otherUserId: number }) {
       </form>
 
       <ReportDialog open={reporting} userId={otherUserId} name={name} onClose={() => setReporting(false)} />
+      <BlockDialog
+        open={blocking}
+        userId={otherUserId}
+        name={name}
+        onClose={() => setBlocking(false)}
+        onBlocked={() => navigate(APP_ROUTES.conversations, { replace: true })}
+      />
     </div>
   );
 }

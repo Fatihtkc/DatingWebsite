@@ -46,6 +46,8 @@ const name = (label: string) =>
     .min(2, `Enter your ${label} (at least 2 characters).`)
     .max(50, 'Use at most 50 characters.');
 
+export { name as nameField };
+
 export const accountSchema = z
   .object({
     firstName: name('first name'),

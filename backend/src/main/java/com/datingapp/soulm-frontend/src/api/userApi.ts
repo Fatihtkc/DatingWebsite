@@ -11,8 +11,8 @@ export async function getMyProfile(signal?: AbortSignal): Promise<UserProfile> {
 }
 
 /**
- * Shape of UploadedImagesResponseDTO. The element types (ImageDTO, BatchUploadResult.RejectedFile)
- * were not supplied, so only the counts are relied upon.
+ * UploadedImagesResponseDTO is `{ accepted: ImageDTO[], rejected: RejectedFile[] }`. The RejectedFile
+ * record (BatchUploadResult) was not supplied, so only the counts are relied upon.
  */
 export interface UploadedImages {
   accepted: number;
@@ -27,12 +27,12 @@ export async function uploadMyImages(files: readonly File[], signal?: AbortSigna
   const body = new FormData();
   for (const file of files) body.append('images', file); // do not set Content-Type: the browser adds the boundary
 
-  const { data } = await http.post<{ images?: unknown; rejected?: unknown }>('/api/users/me/images', body, {
+  const { data } = await http.post<{ accepted?: unknown; rejected?: unknown }>('/api/users/me/images', body, {
     signal,
     timeout: UPLOAD_TIMEOUT_MS,
   });
   return {
-    accepted: Array.isArray(data.images) ? data.images.length : 0,
+    accepted: Array.isArray(data.accepted) ? data.accepted.length : 0,
     rejected: Array.isArray(data.rejected) ? data.rejected.length : 0,
   };
 }

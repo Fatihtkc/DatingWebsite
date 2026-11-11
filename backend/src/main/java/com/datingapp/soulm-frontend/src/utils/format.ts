@@ -40,3 +40,14 @@ export function formatMessageTime(iso: string, now: Date = new Date()): string {
 export function nextPageParam(page: { last: boolean; number: number }): number | undefined {
   return page.last ? undefined : page.number + 1;
 }
+
+/** Calendar date of a LocalDate or LocalDateTime string, in the viewer's locale; empty when unreadable. */
+export function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date);
+}
+
+export function fullName(person: { firstName: string | null; lastName: string | null }): string {
+  return [person.firstName, person.lastName].filter((part): part is string => !!part && part.trim() !== '').join(' ');
+}

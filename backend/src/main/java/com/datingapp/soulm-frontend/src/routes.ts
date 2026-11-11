@@ -15,4 +15,22 @@ export const APP_ROUTES = {
   conversations: '/app/conversations',
   user: (id: number) => `/app/users/${id}`,
   conversation: (otherUserId: number) => `/app/conversations/${otherUserId}`,
+  profile: '/app/profile',
+  notifications: '/app/notifications',
+  settings: '/app/settings',
+  editProfile: '/app/settings/profile',
+  blockedUsers: '/app/settings/blocked',
+} as const;
+
+/** Moderator area. */
+export const MODERATOR_ROUTES = {
+  home: '/moderator',
+  pendingUsers: '/moderator/pending-users',
+  pendingImages: '/moderator/pending-images',
+  complaints: '/moderator/complaints',
+  complaint: (id: number) => `/moderator/complaints/${id}`,
+  users: '/moderator/users',
+  user: (id: number) => `/moderator/users/${id}`,
+  profile: '/moderator/profile',
+  password: '/moderator/settings/password',
 } as const;
